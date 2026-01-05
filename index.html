@@ -5,15 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <title>PadelTour Pro</title>
+    <title>PadelTour Oficial</title>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .tab-active { color: #4f46e5; border-bottom: 2px solid #4f46e5; }
         input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
         .avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: #e2e8f0; }
-        .input-set { width: 1.75rem; height: 2rem; background: white; border-radius: 0.25rem; text-align: center; font-weight: bold; font-size: 0.875rem; border: 1px solid #cbd5e1; }
-        th { cursor: pointer; white-space: nowrap; }
-        th:hover { background-color: #f1f5f9; }
+        .input-set { width: 1.8rem; height: 2.2rem; background: white; border-radius: 0.25rem; text-align: center; font-weight: bold; font-size: 0.9rem; border: 1px solid #cbd5e1; }
+        th { cursor: pointer; transition: 0.2s; white-space: nowrap; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 pb-20">
@@ -32,23 +31,24 @@
     </header>
 
     <section class="max-w-5xl mx-auto px-4 py-4 flex gap-2 overflow-x-auto">
-        <select id="filtroAnio" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0"></select>
-        <select id="filtroLugar" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0"><option value="">Pista</option></select>
-        <select id="filtroJugador" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0"><option value="">Jugador</option></select>
+        <select id="filtroAnio" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"></select>
+        <select id="filtroLugar" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"><option value="">Pistas</option></select>
+        <select id="filtroJugador" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"><option value="">Jugadores</option></select>
+        <select id="filtroPareja" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"><option value="">Parejas</option></select>
     </section>
 
     <main class="max-w-7xl mx-auto px-4">
         <div id="view-clasificacion" class="block overflow-x-auto">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 min-w-[700px]">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 min-w-[750px]">
                 <table class="w-full text-left text-xs">
                     <thead class="bg-slate-50 text-slate-400 font-bold uppercase">
                         <tr>
-                            <th class="p-4 w-12">#</th>
+                            <th class="p-4 w-10">#</th>
                             <th class="p-4" onclick="ordenarTabla('n')">Jugador <span id="sort-n"></span></th>
                             <th class="p-4 text-center" onclick="ordenarTabla('pj')">PJ <span id="sort-pj"></span></th>
                             <th class="p-4 text-center text-indigo-600" onclick="ordenarTabla('wr')">%V/D <span id="sort-wr"></span></th>
                             <th class="p-4 text-center" onclick="ordenarTabla('v')">G <span id="sort-v"></span></th>
-                            <th class="p-4 text-center" onclick="ordenarTabla('d')">P <span id="sort-d"></span></th>
+                            <th class="p-4 text-center text-red-400" onclick="ordenarTabla('d')">P <span id="sort-d"></span></th>
                             <th class="p-4 text-center">Racha</th>
                             <th class="p-4 text-center" onclick="ordenarTabla('sr')">%S <span id="sort-sr"></span></th>
                             <th class="p-4 text-center" onclick="ordenarTabla('jr')">%J <span id="sort-jr"></span></th>
@@ -58,53 +58,38 @@
                 </table>
             </div>
         </div>
-
         <div id="view-historial" class="hidden">
             <div id="historial-cards" class="grid gap-3 md:grid-cols-2"></div>
         </div>
     </main>
 
     <div id="modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[100] backdrop-blur-sm">
-        <div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl overflow-y-auto max-h-[90vh]">
+        <div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl relative">
+            <button id="btnEliminar" onclick="eliminarPartido()" class="absolute top-6 left-6 text-red-400 hidden hover:text-red-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
             <h2 id="modalTitle" class="text-xl font-800 mb-6 text-center italic">Nuevo Partido</h2>
             <form id="formPartido" class="space-y-4">
                 <input type="hidden" id="editId">
                 <input type="password" id="pass" placeholder="PIN SEGURIDAD" class="w-full p-3 bg-slate-100 rounded-xl border-0 text-sm text-center font-bold" required>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2 bg-indigo-50 p-3 rounded-2xl">
-                        <p class="text-[10px] font-bold text-indigo-500 uppercase text-center">Pareja A</p>
                         <select id="j1" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
                         <select id="j2" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
                     </div>
                     <div class="space-y-2 bg-slate-50 p-3 rounded-2xl">
-                        <p class="text-[10px] font-bold text-slate-500 uppercase text-center">Pareja B</p>
                         <select id="j3" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
                         <select id="j4" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
                     </div>
                 </div>
-
-                <div class="bg-slate-900 p-4 rounded-2xl">
-                    <div class="flex items-center justify-center gap-2">
-                        <div class="flex gap-1 bg-slate-800 p-1 rounded-lg">
-                            <input type="number" id="s1e1" class="input-set" oninput="autoTab(this, 's1e2')">
-                            <input type="number" id="s1e2" class="input-set" oninput="autoTab(this, 's2e1')">
-                        </div>
-                        <div class="flex gap-1 bg-slate-800 p-1 rounded-lg">
-                            <input type="number" id="s2e1" class="input-set" oninput="autoTab(this, 's2e2')">
-                            <input type="number" id="s2e2" class="input-set" oninput="autoTab(this, 's3e1')">
-                        </div>
-                        <div class="flex gap-1 bg-slate-800 p-1 rounded-lg">
-                            <input type="number" id="s3e1" class="input-set" oninput="autoTab(this, 's3e2')">
-                            <input type="number" id="s3e2" class="input-set">
-                        </div>
-                    </div>
+                <div class="bg-slate-900 p-4 rounded-2xl flex justify-center gap-2">
+                    <div class="flex gap-1"><input type="number" id="s1e1" class="input-set" oninput="autoTab(this,'s1e2')"><input type="number" id="s1e2" class="input-set" oninput="autoTab(this,'s2e1')"></div>
+                    <div class="flex gap-1"><input type="number" id="s2e1" class="input-set" oninput="autoTab(this,'s2e2')"><input type="number" id="s2e2" class="input-set" oninput="autoTab(this,'s3e1')"></div>
+                    <div class="flex gap-1"><input type="number" id="s3e1" class="input-set" oninput="autoTab(this,'s3e2')"><input type="number" id="s3e2" class="input-set"></div>
                 </div>
-
-                <input list="listaLugares" id="lugarForm" placeholder="Lugar / Pista" class="w-full p-3 bg-slate-100 rounded-xl text-sm" required>
+                <input list="listaLugares" id="lugarForm" placeholder="Pista / Lugar" class="w-full p-3 bg-slate-100 rounded-xl text-sm" required>
                 <datalist id="listaLugares"></datalist>
-
-                <button id="btnSubmit" type="submit" class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-lg shadow-indigo-200">Guardar Resultado</button>
+                <button id="btnSubmit" type="submit" class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-lg">Guardar</button>
                 <button type="button" onclick="cerrarModal()" class="w-full text-slate-400 text-xs font-bold uppercase py-2">Cancelar</button>
             </form>
         </div>
@@ -113,15 +98,16 @@
     <script>
         const URL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=0&single=true&output=csv';
         const URL_JUGADORES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=1804776142&single=true&output=csv';
-        const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbxrcJFgz9NMF9hSmXB-tldlTuYhTb6IHz8PcmFKIxfKCFMGLY9cP1y0kuA8wMxcV9VrqQ/exec';
+        const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbyoBQ0mX2LmElieRG9wL6rweAeFe1IAWWvpi8XfmtMfXISIMpN3hKO60IBlSCIa8wNBTQ/exec';
         const PIN_CORRECTO = "2023";
 
         let datosPartidos = [];
         let infoJugadores = {};
-        let rankingActual = [];
-        let ordenConfig = { campo: 'wr', sentido: -1 }; // Por defecto %V/D descendente
+        let rankingOriginal = []; // Para mantener el ranking fijo por %V/D
+        let rankingMostrado = [];
+        let ordenConfig = { campo: 'wr', sentido: -1 };
 
-        function autoTab(current, nextId) { if (current.value.length >= 1) document.getElementById(nextId).focus(); }
+        function autoTab(c, n) { if(c.value.length >= 1) document.getElementById(n).focus(); }
 
         async function init() {
             await cargarJugadores();
@@ -138,10 +124,7 @@
                 if(parts[1]) {
                     const nom = parts[1].trim();
                     infoJugadores[nom] = parts[2] ? parts[2].trim() : "";
-                    selects.forEach(s => {
-                        if(s.id === 'filtroJugador' && s.options.length === 1) s.innerHTML += `<option value="${nom}">${nom}</option>`;
-                        else if(s.classList.contains('select-jugador')) s.innerHTML += `<option value="${nom}">${nom}</option>`;
-                    });
+                    selects.forEach(s => s.innerHTML += `<option value="${nom}">${nom}</option>`);
                 }
             });
         }
@@ -153,36 +136,35 @@
             
             const anioActual = new Date().getFullYear().toString();
             const anios = [...new Set(datosPartidos.map(f => f[2]))].filter(Boolean).sort((a,b) => b-a);
-            const selAnio = document.getElementById('filtroAnio');
-            selAnio.innerHTML = '<option value="">Todos los años</option>';
-            anios.forEach(a => selAnio.innerHTML += `<option value="${a}" ${a === anioActual ? 'selected' : ''}>${a}</option>`);
-
-            const lugares = [...new Set(datosPartidos.map(f => f[3]))].filter(Boolean);
-            document.getElementById('filtroLugar').innerHTML = '<option value="">Pista</option>' + lugares.map(l => `<option value="${l}">${l}</option>`).join('');
-            document.getElementById('listaLugares').innerHTML = lugares.map(l => `<option value="${l}">`).join('');
+            document.getElementById('filtroAnio').innerHTML = '<option value="">Años</option>' + anios.map(a => `<option value="${a}" ${a === anioActual ? 'selected' : ''}>${a}</option>`).join('');
             
-            aplicarFiltros();
-        }
+            const lugares = [...new Set(datosPartidos.map(f => f[3]))].filter(Boolean);
+            document.getElementById('filtroLugar').innerHTML = '<option value="">Pistas</option>' + lugares.map(l => `<option value="${l}">${l}</option>`).join('');
+            document.getElementById('listaLugares').innerHTML = lugares.map(l => `<option value="${l}">`).join('');
 
-        function ordenarTabla(campo) {
-            if (ordenConfig.campo === campo) {
-                ordenConfig.sentido *= -1;
-            } else {
-                ordenConfig.campo = campo;
-                ordenConfig.sentido = -1;
-            }
-            renderizarRanking();
+            const parejasSet = new Set();
+            datosPartidos.forEach(p => {
+                parejasSet.add([p[4].trim(), p[5].trim()].sort().join(' / '));
+                parejasSet.add([p[6].trim(), p[7].trim()].sort().join(' / '));
+            });
+            document.getElementById('filtroPareja').innerHTML = '<option value="">Parejas</option>' + [...parejasSet].sort().map(p => `<option value="${p}">${p}</option>`).join('');
+
+            aplicarFiltros();
         }
 
         function aplicarFiltros() {
             const fAnio = document.getElementById('filtroAnio').value;
             const fLugar = document.getElementById('filtroLugar').value;
             const fJug = document.getElementById('filtroJugador').value;
+            const fPar = document.getElementById('filtroPareja').value;
 
             const filtrados = datosPartidos.filter(f => {
+                const p1 = [f[4].trim(), f[5].trim()].sort().join(' / ');
+                const p2 = [f[6].trim(), f[7].trim()].sort().join(' / ');
                 return (!fAnio || f[2] === fAnio) && 
                        (!fLugar || f[3] === fLugar) && 
-                       (!fJug || [f[4],f[5],f[6],f[7]].map(n => n.trim()).includes(fJug));
+                       (!fJug || [f[4],f[5],f[6],f[7]].map(n => n.trim()).includes(fJug)) &&
+                       (!fPar || (p1 === fPar || p2 === fPar));
             });
             procesarStats(filtrados);
         }
@@ -193,49 +175,51 @@
 
             partidos.forEach(c => {
                 const s = c.map(v => parseInt(v) || 0);
-                const setsE1 = (s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0);
-                const setsE2 = (s[9]>s[8]?1:0)+(s[11]>s[10]?1:0)+(s[13]>s[12]?1:0);
-                const ganoE1 = setsE1 > setsE2;
+                const sE1 = (s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0);
+                const sE2 = (s[9]>s[8]?1:0)+(s[11]>s[10]?1:0)+(s[13]>s[12]?1:0);
+                const ganoE1 = sE1 > sE2;
 
                 const act = (n, g, sf, sc, jf, jc) => {
                     n = n.trim(); if(!stats[n]) return;
-                    stats[n].pj++; 
-                    if(g) stats[n].v++; else stats[n].d++;
+                    stats[n].pj++; if(g) stats[n].v++; else stats[n].d++;
                     stats[n].sg += sf; stats[n].st += (sf+sc);
                     stats[n].jg += jf; stats[n].jt += (jf+jc);
                     stats[n].racha.push(g ? 'V' : 'D');
                 };
-                [c[4], c[5]].forEach(n => act(n, ganoE1, setsE1, setsE2, s[8]+s[10]+s[12], s[9]+s[11]+s[13]));
-                [c[6], c[7]].forEach(n => act(n, !ganoE1, setsE2, setsE1, s[9]+s[11]+s[13], s[8]+s[10]+s[12]));
+                [c[4], c[5]].forEach(n => act(n, ganoE1, sE1, sE2, s[8]+s[10]+s[12], s[9]+s[11]+s[13]));
+                [c[6], c[7]].forEach(n => act(n, !ganoE1, sE2, sE1, s[9]+s[11]+s[13], s[8]+s[10]+s[12]));
             });
 
-            rankingActual = Object.keys(stats).filter(n => stats[n].pj > 0).map(n => ({
+            // Ranking ORIGINAL basado en %V/D (Siempre igual para el número #)
+            rankingOriginal = Object.keys(stats).filter(n => stats[n].pj > 0).map(n => ({
                 n, ...stats[n],
                 wr: (stats[n].v/stats[n].pj)*100,
                 sr: (stats[n].sg/stats[n].st)*100 || 0,
                 jr: (stats[n].jg/stats[n].jt)*100 || 0,
                 ultimos: stats[n].racha.slice(-5).reverse()
-            }));
+            })).sort((a,b) => b.wr - a.wr);
+
+            // Mapear el número de ranking fijo
+            rankingMostrado = rankingOriginal.map((j, i) => ({ ...j, rankFijo: i + 1 }));
 
             renderizarRanking();
             renderizarHistorial(partidos);
         }
 
         function renderizarRanking() {
-            // Actualizar indicadores visuales de flechas
             document.querySelectorAll('th span').forEach(s => s.innerText = '');
             const span = document.getElementById(`sort-${ordenConfig.campo}`);
             if(span) span.innerText = ordenConfig.sentido === 1 ? ' ▲' : ' ▼';
 
-            const sorted = [...rankingActual].sort((a,b) => {
+            const sorted = [...rankingMostrado].sort((a,b) => {
                 let vA = a[ordenConfig.campo], vB = b[ordenConfig.campo];
                 if (typeof vA === 'string') return vA.localeCompare(vB) * ordenConfig.sentido;
                 return (vA - vB) * ordenConfig.sentido;
             });
 
-            document.getElementById('tabla-body').innerHTML = sorted.map((j, idx) => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="p-4 font-bold text-slate-400">#${idx + 1}</td>
+            document.getElementById('tabla-body').innerHTML = sorted.map(j => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-4 font-bold text-slate-400">#${j.rankFijo}</td>
                     <td class="p-4 flex items-center gap-3 cursor-pointer" onclick="verJugador('${j.n}')">
                         <img src="${infoJugadores[j.n] || 'https://via.placeholder.com/100'}" class="avatar">
                         <span class="font-bold text-indigo-600">${j.n}</span>
@@ -244,22 +228,25 @@
                     <td class="p-4 text-center font-bold text-indigo-600">${j.wr.toFixed(1)}%</td>
                     <td class="p-4 text-center text-emerald-600 font-bold">${j.v}</td>
                     <td class="p-4 text-center text-red-400 font-bold">${j.d}</td>
-                    <td class="p-4 text-center">
-                        <div class="flex justify-center gap-1">${j.ultimos.map(r => `<span class="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white ${r==='V'?'bg-emerald-500':'bg-red-500'}">${r}</span>`).join('')}</div>
-                    </td>
+                    <td class="p-4 text-center"><div class="flex justify-center gap-1">${j.ultimos.map(r => `<span class="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white ${r==='V'?'bg-emerald-500':'bg-red-500'}">${r}</span>`).join('')}</div></td>
                     <td class="p-4 text-center">${j.sr.toFixed(0)}%</td>
                     <td class="p-4 text-center">${j.jr.toFixed(0)}%</td>
                 </tr>`).join('');
         }
 
+        function ordenarTabla(campo) {
+            if (ordenConfig.campo === campo) ordenConfig.sentido *= -1;
+            else { ordenConfig.campo = campo; ordenConfig.sentido = -1; }
+            renderizarRanking();
+        }
+
         function renderizarHistorial(partidos) {
-            document.getElementById('historial-cards').innerHTML = [...partidos].reverse().map((c, index) => {
+            document.getElementById('historial-cards').innerHTML = [...partidos].reverse().map(c => {
                 const s = c.map(v => parseInt(v) || 0);
                 const ganoE1 = ((s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0)) > ((s[9]>s[8]?1:0)+(s[11]>s[10]?1:0)+(s[13]>s[12]?1:0));
-                
                 return `
-                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3 relative group">
-                    <button onclick="editarPartido('${c[0]}')" class="absolute top-3 right-3 text-slate-300 hover:text-indigo-600 transition-colors">
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3 relative">
+                    <button onclick="editarPartido('${c[0]}')" class="absolute top-3 right-3 text-slate-300 hover:text-indigo-600">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                     </button>
                     <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase"><span>${c[3]}</span> <span>${c[1]}</span></div>
@@ -279,14 +266,22 @@
                         document.getElementById('j3').value, document.getElementById('j4').value].filter(v => v !== "");
             const btn = document.getElementById('btnSubmit');
             const esRepetido = new Set(js).size !== js.length && js.length > 1;
-            
-            if(esRepetido) {
-                btn.disabled = true; btn.style.background = "#ef4444"; btn.innerText = "HAY JUGADORES REPETIDOS";
-            } else {
-                btn.disabled = false; btn.style.background = "#4f46e5"; btn.innerText = document.getElementById('editId').value ? "ACTUALIZAR" : "GUARDAR RESULTADO";
-            }
+            btn.disabled = esRepetido;
+            btn.style.background = esRepetido ? "#ef4444" : "#4f46e5";
+            if(esRepetido) btn.innerText = "JUGADORES REPETIDOS";
+            else btn.innerText = document.getElementById('editId').value ? "ACTUALIZAR" : "GUARDAR";
             return !esRepetido;
         }
+
+        function abrirModal() {
+            document.getElementById('formPartido').reset();
+            document.getElementById('editId').value = "";
+            document.getElementById('btnEliminar').classList.add('hidden');
+            document.getElementById('modalTitle').innerText = "Nuevo Partido";
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function cerrarModal() { document.getElementById('modal').style.display = 'none'; }
 
         function editarPartido(id) {
             const p = datosPartidos.find(x => x[0] === id);
@@ -294,6 +289,7 @@
             abrirModal();
             document.getElementById('modalTitle').innerText = "Editar Partido";
             document.getElementById('editId').value = p[0];
+            document.getElementById('btnEliminar').classList.remove('hidden');
             document.getElementById('j1').value = p[4]; document.getElementById('j2').value = p[5];
             document.getElementById('j3').value = p[6]; document.getElementById('j4').value = p[7];
             document.getElementById('s1e1').value = p[8]; document.getElementById('s1e2').value = p[9];
@@ -303,30 +299,33 @@
             validarJugadores();
         }
 
-        function abrirModal() {
-            document.getElementById('formPartido').reset();
-            document.getElementById('editId').value = "";
-            document.getElementById('modalTitle').innerText = "Nuevo Partido";
-            document.getElementById('modal').style.display = 'flex';
+        async function eliminarPartido() {
+            const pin = document.getElementById('pass').value;
+            if(pin !== PIN_CORRECTO) return alert("PIN Incorrecto");
+            if(!confirm("¿Borrar este partido permanentemente?")) return;
+            
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true; btn.innerText = "BORRANDO...";
+            
+            await fetch(URL_SCRIPT, { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                body: JSON.stringify({ action: "DELETE", id: document.getElementById('editId').value, password: pin }) 
+            });
+            location.reload();
         }
-
-        function cerrarModal() { document.getElementById('modal').style.display = 'none'; }
 
         document.getElementById('formPartido').onsubmit = async (e) => {
             e.preventDefault();
             const pin = document.getElementById('pass').value;
-            if(pin !== PIN_CORRECTO) {
-                alert("PIN INCORRECTO: No tienes permiso para guardar.");
-                return;
-            }
-
+            if(pin !== PIN_CORRECTO) return alert("PIN Incorrecto");
             if(!validarJugadores()) return;
 
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true; btn.innerText = "ENVIANDO...";
 
             const datos = {
-                id: document.getElementById('editId').value, // Si existe, el script de Apps Script lo usará para buscar la fila
+                id: document.getElementById('editId').value,
                 password: pin,
                 fecha: new Date().toLocaleDateString('es-ES'),
                 temporada: new Date().getFullYear().toString(),
@@ -338,23 +337,16 @@
                 s3e1: document.getElementById('s3e1').value||0, s3e2: document.getElementById('s3e2').value||0
             };
 
-            try {
-                await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(datos) });
-                location.reload();
-            } catch (err) { alert("Error de red"); btn.disabled = false; }
+            await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(datos) });
+            location.reload();
         };
 
-        function verJugador(nombre) {
-            document.getElementById('filtroJugador').value = nombre;
-            aplicarFiltros();
-            cambiarTab('historial');
-        }
-
-        function cambiarTab(tab) {
-            document.getElementById('view-clasificacion').style.display = tab === 'clasificacion' ? 'block' : 'none';
-            document.getElementById('view-historial').style.display = tab === 'historial' ? 'block' : 'none';
-            document.getElementById('btn-tab-clas').className = `pb-3 text-sm font-bold ${tab === 'clasificacion' ? 'tab-active' : 'text-slate-400'}`;
-            document.getElementById('btn-tab-hist').className = `pb-3 text-sm font-bold ${tab === 'historial' ? 'tab-active' : 'text-slate-400'}`;
+        function verJugador(n) { document.getElementById('filtroJugador').value = n; aplicarFiltros(); cambiarTab('historial'); }
+        function cambiarTab(t) {
+            document.getElementById('view-clasificacion').style.display = t === 'clasificacion' ? 'block' : 'none';
+            document.getElementById('view-historial').style.display = t === 'historial' ? 'block' : 'none';
+            document.getElementById('btn-tab-clas').className = `pb-3 text-sm font-bold ${t === 'clasificacion' ? 'tab-active' : 'text-slate-400'}`;
+            document.getElementById('btn-tab-hist').className = `pb-3 text-sm font-bold ${t === 'historial' ? 'tab-active' : 'text-slate-400'}`;
         }
 
         init();
