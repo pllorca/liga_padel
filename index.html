@@ -71,7 +71,10 @@
             <h2 id="modalTitle" class="text-xl font-800 mb-6 text-center italic">Nuevo Partido</h2>
             <form id="formPartido" class="space-y-4">
                 <input type="hidden" id="editId">
-                <input type="password" id="pass" placeholder="PIN SEGURIDAD" class="w-full p-3 bg-slate-100 rounded-xl border-0 text-sm text-center font-bold" required>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="password" id="pass" placeholder="PIN" class="p-3 bg-slate-100 rounded-xl border-0 text-sm text-center font-bold" required>
+                    <input type="date" id="fechaForm" class="p-3 bg-slate-100 rounded-xl border-0 text-xs text-center font-bold" required>
+                </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2 bg-indigo-50 p-3 rounded-2xl">
                         <select id="j1" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
@@ -98,16 +101,25 @@
     <script>
         const URL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=0&single=true&output=csv';
         const URL_JUGADORES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=1804776142&single=true&output=csv';
-        const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbyoBQ0mX2LmElieRG9wL6rweAeFe1IAWWvpi8XfmtMfXISIMpN3hKO60IBlSCIa8wNBTQ/exec';
+        const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzqYBV7c0hvqqKV5RFG_6-JJpunziXs8NQH954P6QoyblpxVXp3InCLdAg7ITYZaOySqw/exec';
         const PIN_CORRECTO = "2023";
 
         let datosPartidos = [];
         let infoJugadores = {};
-        let rankingOriginal = []; // Para mantener el ranking fijo por %V/D
         let rankingMostrado = [];
         let ordenConfig = { campo: 'wr', sentido: -1 };
 
         function autoTab(c, n) { if(c.value.length >= 1) document.getElementById(n).focus(); }
+
+        // Parsea fechas DD/MM/YYYY o YYYY-MM-DD para comparar
+        function parsearFecha(f) {
+            if(!f) return 0;
+            if(f.includes('/')) {
+                const parts = f.split('/');
+                return new Date(parts[2], parts[1]-1, parts[0]).getTime();
+            }
+            return new Date(f).getTime();
+        }
 
         async function init() {
             await cargarJugadores();
@@ -134,6 +146,9 @@
             const texto = await res.text();
             datosPartidos = texto.split('\n').slice(1).map(f => f.split(',')).filter(f => f.length > 5);
             
+            // Ordenamos por fecha descendente (más nuevo primero)
+            datosPartidos.sort((a, b) => parsearFecha(b[1]) - parsearFecha(a[1]));
+
             const anioActual = new Date().getFullYear().toString();
             const anios = [...new Set(datosPartidos.map(f => f[2]))].filter(Boolean).sort((a,b) => b-a);
             document.getElementById('filtroAnio').innerHTML = '<option value="">Años</option>' + anios.map(a => `<option value="${a}" ${a === anioActual ? 'selected' : ''}>${a}</option>`).join('');
@@ -190,17 +205,13 @@
                 [c[6], c[7]].forEach(n => act(n, !ganoE1, sE2, sE1, s[9]+s[11]+s[13], s[8]+s[10]+s[12]));
             });
 
-            // Ranking ORIGINAL basado en %V/D (Siempre igual para el número #)
-            rankingOriginal = Object.keys(stats).filter(n => stats[n].pj > 0).map(n => ({
+            rankingMostrado = Object.keys(stats).filter(n => stats[n].pj > 0).map(n => ({
                 n, ...stats[n],
                 wr: (stats[n].v/stats[n].pj)*100,
                 sr: (stats[n].sg/stats[n].st)*100 || 0,
                 jr: (stats[n].jg/stats[n].jt)*100 || 0,
                 ultimos: stats[n].racha.slice(-5).reverse()
-            })).sort((a,b) => b.wr - a.wr);
-
-            // Mapear el número de ranking fijo
-            rankingMostrado = rankingOriginal.map((j, i) => ({ ...j, rankFijo: i + 1 }));
+            })).sort((a,b) => b.wr - a.wr).map((j, i) => ({ ...j, rankFijo: i + 1 }));
 
             renderizarRanking();
             renderizarHistorial(partidos);
@@ -241,7 +252,8 @@
         }
 
         function renderizarHistorial(partidos) {
-            document.getElementById('historial-cards').innerHTML = [...partidos].reverse().map(c => {
+            // Se asume que partidos ya vienen ordenados del cargarPartidos
+            document.getElementById('historial-cards').innerHTML = partidos.map(c => {
                 const s = c.map(v => parseInt(v) || 0);
                 const ganoE1 = ((s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0)) > ((s[9]>s[8]?1:0)+(s[11]>s[10]?1:0)+(s[13]>s[12]?1:0));
                 return `
@@ -276,6 +288,7 @@
         function abrirModal() {
             document.getElementById('formPartido').reset();
             document.getElementById('editId').value = "";
+            document.getElementById('fechaForm').value = new Date().toISOString().split('T')[0];
             document.getElementById('btnEliminar').classList.add('hidden');
             document.getElementById('modalTitle').innerText = "Nuevo Partido";
             document.getElementById('modal').style.display = 'flex';
@@ -290,6 +303,13 @@
             document.getElementById('modalTitle').innerText = "Editar Partido";
             document.getElementById('editId').value = p[0];
             document.getElementById('btnEliminar').classList.remove('hidden');
+            
+            // Convertir DD/MM/YYYY a YYYY-MM-DD para el input date
+            if(p[1].includes('/')) {
+                const parts = p[1].split('/');
+                document.getElementById('fechaForm').value = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+            }
+
             document.getElementById('j1').value = p[4]; document.getElementById('j2').value = p[5];
             document.getElementById('j3').value = p[6]; document.getElementById('j4').value = p[7];
             document.getElementById('s1e1').value = p[8]; document.getElementById('s1e2').value = p[9];
@@ -307,12 +327,15 @@
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true; btn.innerText = "BORRANDO...";
             
-            await fetch(URL_SCRIPT, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                body: JSON.stringify({ action: "DELETE", id: document.getElementById('editId').value, password: pin }) 
-            });
-            location.reload();
+            try {
+                await fetch(URL_SCRIPT, { 
+                    method: 'POST', 
+                    mode: 'no-cors', 
+                    body: JSON.stringify({ action: "DELETE", id: document.getElementById('editId').value, password: pin }) 
+                });
+                alert("Partido eliminado.");
+                location.reload();
+            } catch (e) { alert("Error al borrar"); btn.disabled = false; }
         }
 
         document.getElementById('formPartido').onsubmit = async (e) => {
@@ -324,11 +347,15 @@
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true; btn.innerText = "ENVIANDO...";
 
+            const fechaRaw = document.getElementById('fechaForm').value; // YYYY-MM-DD
+            const parts = fechaRaw.split('-');
+            const fechaBonita = `${parts[2]}/${parts[1]}/${parts[0]}`;
+
             const datos = {
                 id: document.getElementById('editId').value,
                 password: pin,
-                fecha: new Date().toLocaleDateString('es-ES'),
-                temporada: new Date().getFullYear().toString(),
+                fecha: fechaBonita,
+                temporada: parts[0],
                 lugar: document.getElementById('lugarForm').value,
                 j1: document.getElementById('j1').value, j2: document.getElementById('j2').value,
                 j3: document.getElementById('j3').value, j4: document.getElementById('j4').value,
@@ -337,8 +364,10 @@
                 s3e1: document.getElementById('s3e1').value||0, s3e2: document.getElementById('s3e2').value||0
             };
 
-            await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(datos) });
-            location.reload();
+            try {
+                await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(datos) });
+                location.reload();
+            } catch (e) { alert("Error al guardar"); btn.disabled = false; }
         };
 
         function verJugador(n) { document.getElementById('filtroJugador').value = n; aplicarFiltros(); cambiarTab('historial'); }
