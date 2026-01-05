@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <title>Tenis Pro Stats</title>
+    <title>TenisTour - Estadísticas</title>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .tab-active { color: #4f46e5; border-bottom: 2px solid #4f46e5; }
         input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
         .avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: #e2e8f0; }
-        .streak-v { color: #10b981; }
-        .streak-d { color: #ef4444; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 pb-20">
@@ -31,9 +29,10 @@
     </header>
 
     <section class="max-w-5xl mx-auto px-4 py-4 flex gap-2 overflow-x-auto">
-        <select id="filtroAnio" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"><option value="">Todos los años</option></select>
-        <select id="filtroLugar" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"><option value="">Todos los lugares</option></select>
-        <select id="filtroJugador" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"><option value="">Filtrar por Jugador</option></select>
+        <select id="filtroAnio" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0"><option value="">Años</option></select>
+        <select id="filtroLugar" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0"><option value="">Lugares</option></select>
+        <select id="filtroJugador" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0"><option value="">Jugador</option></select>
+        <select id="filtroPareja" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0"><option value="">Pareja</option></select>
     </section>
 
     <main class="max-w-5xl mx-auto px-4">
@@ -45,7 +44,7 @@
                             <th class="p-4">Jugador</th>
                             <th class="p-4 text-center">PJ</th>
                             <th class="p-4 text-center text-indigo-600">V/D %</th>
-                            <th class="p-4 text-center">Racha</th>
+                            <th class="p-4 text-center">Racha (5)</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-body" class="divide-y divide-slate-50"></tbody>
@@ -58,10 +57,10 @@
         </div>
     </main>
 
-   <div id="modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[100] backdrop-blur-sm">
+    <div id="modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[100] backdrop-blur-sm">
         <div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl">
             <h2 class="text-xl font-800 mb-6 italic text-center">Añadir Partido</h2>
-            <form id="formPartido" class="space-y-6">
+            <form id="formPartido" class="space-y-5">
                 <input type="password" id="pass" placeholder="PIN de Seguridad" class="w-full p-3 bg-slate-50 rounded-xl border-0 text-sm text-center" required>
                 
                 <div class="grid grid-cols-2 gap-4">
@@ -84,28 +83,29 @@
                             <span class="text-white self-center">-</span>
                             <input type="number" id="s1e2" placeholder="0" class="w-7 h-8 bg-white rounded text-center font-bold text-sm">
                         </div>
-                        <div class="w-2"></div>
+                        <div class="w-1"></div>
                         <div class="flex gap-1 bg-slate-800 p-1 rounded-lg">
                             <input type="number" id="s2e1" placeholder="0" class="w-7 h-8 bg-white rounded text-center font-bold text-sm">
                             <span class="text-white self-center">-</span>
                             <input type="number" id="s2e2" placeholder="0" class="w-7 h-8 bg-white rounded text-center font-bold text-sm">
                         </div>
-                        <div class="w-2"></div>
+                        <div class="w-1"></div>
                         <div class="flex gap-1 bg-slate-800 p-1 rounded-lg">
                             <input type="number" id="s3e1" placeholder="0" class="w-7 h-8 bg-white rounded text-center font-bold text-sm">
                             <span class="text-white self-center">-</span>
                             <input type="number" id="s3e2" placeholder="0" class="w-7 h-8 bg-white rounded text-center font-bold text-sm">
                         </div>
                     </div>
-                    <p class="text-[9px] text-slate-400 text-center mt-2 uppercase font-bold tracking-widest">Set 1 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Set 2 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Set 3</p>
+                    <p class="text-[8px] text-slate-400 text-center mt-2 uppercase font-bold tracking-widest">Set 1 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Set 2 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Set 3</p>
                 </div>
 
-                <input type="text" id="lugarForm" placeholder="Lugar (Club)" class="w-full p-3 bg-slate-50 rounded-xl border-0 text-sm" required>
-                
-                <div class="space-y-3">
-                    <button id="btnSubmit" type="submit" class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-lg shadow-indigo-200">Guardar Resultado</button>
-                    <button type="button" onclick="document.getElementById('modal').style.display='none'" class="w-full text-slate-400 text-xs font-bold uppercase">Volver</button>
+                <div>
+                    <input list="listaLugares" id="lugarForm" placeholder="Lugar (Club)" class="w-full p-3 bg-slate-50 rounded-xl border-0 text-sm" required>
+                    <datalist id="listaLugares"></datalist>
                 </div>
+
+                <button id="btnSubmit" type="submit" class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold uppercase text-xs tracking-widest">Guardar Resultado</button>
+                <button type="button" onclick="document.getElementById('modal').style.display='none'" class="w-full text-slate-400 text-xs font-bold uppercase">Cancelar</button>
             </form>
         </div>
     </div>
@@ -113,7 +113,7 @@
     <script>
         const URL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=0&single=true&output=csv';
         const URL_JUGADORES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=1804776142&single=true&output=csv';
-        const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbyS4wOnaJLS65_tU_Yn642_rpdMw74tQ4pTWa291_wYDLrimTDYdPLzP_0b-A-qeTZikw/exec';
+        const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbxIDrYEHoeKwR3LEP09gSYY0muqnezB6HP96FFT_fRl42ZKURNnFJkkNY2uIJbIdO7mSQ/exec';
         const PIN_CORRECTO = "2023";
 
         let datosPartidos = [];
@@ -125,41 +125,60 @@
         }
 
         async function cargarJugadores() {
-            try {
-                const res = await fetch(URL_JUGADORES);
-                const texto = await res.text();
-                const filas = texto.split('\n').slice(1);
-                const selects = document.querySelectorAll('.select-jugador, #filtroJugador');
-                
-                filas.forEach(f => {
-                    const columnas = f.split(',');
-                    if(columnas[1]) {
-                        const nom = columnas[1].trim();
-                        infoJugadores[nom] = columnas[2] ? columnas[2].trim() : "";
-                        selects.forEach(s => {
-                            const opt = document.createElement('option');
-                            opt.value = nom; opt.textContent = nom;
-                            s.appendChild(opt);
-                        });
-                    }
-                });
-            } catch(e) { console.error("Error cargando jugadores"); }
+            const res = await fetch(URL_JUGADORES);
+            const texto = await res.text();
+            const filas = texto.split('\n').slice(1);
+            const selects = document.querySelectorAll('.select-jugador, #filtroJugador');
+            
+            filas.forEach(f => {
+                const [id, nombre, foto] = f.split(',');
+                if(nombre) {
+                    const nom = nombre.trim();
+                    infoJugadores[nom] = foto ? foto.trim() : "";
+                    selects.forEach(s => s.innerHTML += `<option value="${nom}">${nom}</option>`);
+                }
+            });
         }
 
         async function cargarPartidos() {
-            try {
-                const res = await fetch(URL_CSV);
-                const texto = await res.text();
-                datosPartidos = texto.split('\n').slice(1).map(f => f.split(',')).filter(f => f.length > 5);
-                
-                const anios = [...new Set(datosPartidos.map(f => f[2]))].filter(Boolean);
-                const lugares = [...new Set(datosPartidos.map(f => f[3]))].filter(Boolean);
-                
-                anios.forEach(a => document.getElementById('filtroAnio').innerHTML += `<option value="${a}">${a}</option>`);
-                lugares.forEach(l => document.getElementById('filtroLugar').innerHTML += `<option value="${l}">${l}</option>`);
-                
-                aplicarFiltros();
-            } catch(e) { console.error("Error cargando partidos"); }
+            const res = await fetch(URL_CSV);
+            const texto = await res.text();
+            datosPartidos = texto.split('\n').slice(1).map(f => f.split(',')).filter(f => f.length > 5);
+            
+            // Llenar filtros
+            const anios = [...new Set(datosPartidos.map(f => f[2]))].filter(Boolean);
+            const lugares = [...new Set(datosPartidos.map(f => f[3]))].filter(Boolean);
+            
+            anios.forEach(a => document.getElementById('filtroAnio').innerHTML += `<option value="${a}">${a}</option>`);
+            lugares.forEach(l => {
+                document.getElementById('filtroLugar').innerHTML += `<option value="${l}">${l}</option>`;
+                document.getElementById('listaLugares').innerHTML += `<option value="${l}">`;
+            });
+            
+            actualizarFiltroParejas(datosPartidos);
+            aplicarFiltros();
+        }
+
+        function actualizarFiltroParejas(partidos) {
+            const parejasSet = new Set();
+            partidos.forEach(p => {
+                parejasSet.add([p[4].trim(), p[5].trim()].sort().join(' / '));
+                parejasSet.add([p[6].trim(), p[7].trim()].sort().join(' / '));
+            });
+            const sel = document.getElementById('filtroPareja');
+            sel.innerHTML = '<option value="">Parejas</option>';
+            [...parejasSet].sort().forEach(p => sel.innerHTML += `<option value="${p}">${p}</option>`);
+        }
+
+        function validarJugadores() {
+            const js = [document.getElementById('j1').value, document.getElementById('j2').value, 
+                        document.getElementById('j3').value, document.getElementById('j4').value].filter(v => v !== "");
+            const btn = document.getElementById('btnSubmit');
+            if(new Set(js).size !== js.length) {
+                btn.disabled = true; btn.classList.replace('bg-indigo-600', 'bg-red-500'); btn.innerText = "JUGADOR REPETIDO";
+            } else {
+                btn.disabled = false; btn.classList.replace('bg-red-500', 'bg-indigo-600'); btn.innerText = "GUARDAR RESULTADO";
+            }
         }
 
         function cambiarTab(tab) {
@@ -173,40 +192,38 @@
             const fAnio = document.getElementById('filtroAnio').value;
             const fLugar = document.getElementById('filtroLugar').value;
             const fJug = document.getElementById('filtroJugador').value;
+            const fPareja = document.getElementById('filtroPareja').value;
 
             const filtrados = datosPartidos.filter(f => {
+                const p1 = [f[4].trim(), f[5].trim()].sort().join(' / ');
+                const p2 = [f[6].trim(), f[7].trim()].sort().join(' / ');
                 const matchAnio = !fAnio || f[2] === fAnio;
                 const matchLugar = !fLugar || f[3] === fLugar;
                 const matchJug = !fJug || [f[4],f[5],f[6],f[7]].map(n => n.trim()).includes(fJug);
-                return matchAnio && matchLugar && matchJug;
+                const matchPar = !fPareja || (p1 === fPareja || p2 === fPareja);
+                return matchAnio && matchLugar && matchJug && matchPar;
             });
-
             pintarTablas(filtrados);
         }
 
         function pintarTablas(partidos) {
             let stats = {};
-            Object.keys(infoJugadores).forEach(n => stats[n] = {v:0, pj:0, sg:0, st:0, racha: []});
+            Object.keys(infoJugadores).forEach(n => stats[n] = {v:0, pj:0, sg:0, st:0, racha:[]});
 
-            // Procesar cronológicamente para la racha (el CSV suele venir de antiguo a nuevo)
             partidos.forEach(c => {
                 const s1e1 = parseInt(c[8])||0, s1e2 = parseInt(c[9])||0;
                 const s2e1 = parseInt(c[10])||0, s2e2 = parseInt(c[11])||0;
                 const s3e1 = parseInt(c[12])||0, s3e2 = parseInt(c[13])||0;
-                
                 const setsE1 = (s1e1>s1e2?1:0)+(s2e1>s2e2?1:0)+(s3e1>s3e2?1:0);
                 const setsE2 = (s1e2>s1e1?1:0)+(s2e2>s2e1?1:0)+(s3e2>s3e1?1:0);
                 const ganoE1 = setsE1 > setsE2;
 
                 const act = (n, g, sf, sc) => {
-                    n = n.trim();
-                    if(!stats[n]) return;
-                    stats[n].pj++; 
-                    if(g) stats[n].v++;
+                    n = n.trim(); if(!stats[n]) return;
+                    stats[n].pj++; if(g) stats[n].v++;
                     stats[n].sg += sf; stats[n].st += (sf+sc);
                     stats[n].racha.push(g ? 'V' : 'D');
                 };
-
                 [c[4], c[5]].forEach(n => act(n, ganoE1, setsE1, setsE2));
                 [c[6], c[7]].forEach(n => act(n, !ganoE1, setsE2, setsE1));
             });
@@ -215,7 +232,7 @@
                 n, ...stats[n],
                 wr: (stats[n].v/stats[n].pj)*100,
                 sr: (stats[n].sg/stats[n].st)*100,
-                ultimos: stats[n].racha.slice(-3).reverse()
+                ultimos: stats[n].racha.slice(-5).reverse()
             })).sort((a,b) => b.wr - a.wr || b.sr - a.sr);
 
             document.getElementById('tabla-body').innerHTML = ranking.map(j => `
@@ -224,77 +241,48 @@
                         <img src="${infoJugadores[j.n] || 'https://via.placeholder.com/100'}" class="avatar">
                         <span class="font-bold">${j.n}</span>
                     </td>
-                    <td class="p-4 text-center font-medium">${j.pj}</td>
+                    <td class="p-4 text-center">${j.pj}</td>
                     <td class="p-4 text-center font-bold text-indigo-600">${j.wr.toFixed(1)}%</td>
-                    <td class="p-4 text-center">
+                    <td class="p-4">
                         <div class="flex justify-center gap-1">
-                            ${j.ultimos.map(r => `<span class="text-[10px] font-black ${r==='V'?'streak-v':'streak-d'}">${r}</span>`).join('')}
+                            ${j.ultimos.map(r => `<span class="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white ${r==='V'?'bg-emerald-500':'bg-red-500'}">${r}</span>`).join('')}
                         </div>
                     </td>
                 </tr>`).join('');
 
             document.getElementById('historial-cards').innerHTML = [...partidos].reverse().map(c => `
                 <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-                    <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase mb-3">
-                        <span>${c[3]}</span> <span>${c[1]}</span>
-                    </div>
-                    <div class="flex items-center justify-between gap-4">
-                        <div class="text-[11px] font-bold text-slate-700 w-1/3 leading-tight">${c[4]}<br>${c[5]}</div>
-                        <div class="flex-1 flex justify-center gap-1 font-mono text-[11px] font-bold bg-indigo-50 text-indigo-600 px-2 py-1 rounded-lg">
+                    <div class="flex justify-between text-[10px] font-bold text-slate-400 mb-3 uppercase"><span>${c[3]}</span> <span>${c[1]}</span></div>
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="text-[11px] font-bold text-slate-700 w-1/3">${c[4]} / ${c[5]}</div>
+                        <div class="bg-indigo-50 text-indigo-600 px-2 py-1 rounded-lg font-mono text-[11px] font-bold">
                             ${c[8]}-${c[9]} | ${c[10]}-${c[11]} ${c[12]||c[13]?`| ${c[12]}-${c[13]}`:''}
                         </div>
-                        <div class="text-[11px] font-bold text-slate-700 w-1/3 text-right leading-tight">${c[6]}<br>${c[7]}</div>
+                        <div class="text-[11px] font-bold text-slate-700 w-1/3 text-right">${c[6]} / ${c[7]}</div>
                     </div>
                 </div>`).join('');
         }
 
-        function validarJugadores() {
-            const selects = [
-                document.getElementById('j1').value,
-                document.getElementById('j2').value,
-                document.getElementById('j3').value,
-                document.getElementById('j4').value
-            ].filter(v => v !== "");
-            
-            const unicos = new Set(selects);
-            const btn = document.getElementById('btnSubmit');
-            
-            if(unicos.size !== selects.length) {
-                btn.disabled = true;
-                btn.classList.replace('bg-indigo-600', 'bg-red-400');
-                btn.innerText = "JUGADORES DUPLICADOS";
-            } else {
-                btn.disabled = false;
-                btn.classList.replace('bg-red-400', 'bg-indigo-600');
-                btn.innerText = "GUARDAR";
-            }
-        }
-
         document.getElementById('formPartido').onsubmit = async (e) => {
             e.preventDefault();
-            const pin = document.getElementById('pass').value;
-            if(pin !== PIN_CORRECTO) return alert("PIN Incorrecto");
-
+            if(document.getElementById('pass').value !== PIN_CORRECTO) return alert("PIN Incorrecto");
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true; btn.innerText = "Enviando...";
-
             const datos = {
-                password: pin,
+                password: PIN_CORRECTO,
                 fecha: new Date().toLocaleDateString('es-ES'),
                 temporada: new Date().getFullYear().toString(),
                 lugar: document.getElementById('lugarForm').value,
                 j1: document.getElementById('j1').value, j2: document.getElementById('j2').value,
                 j3: document.getElementById('j3').value, j4: document.getElementById('j4').value,
-                s1e1: document.getElementById('s1e1').value || 0, s1e2: document.getElementById('s1e2').value || 0,
-                s2e1: document.getElementById('s2e1').value || 0, s2e2: document.getElementById('s2e2').value || 0,
-                s3e1: document.getElementById('s3e1').value || 0, s3e2: document.getElementById('s3e2').value || 0
+                s1e1: document.getElementById('s1e1').value||0, s1e2: document.getElementById('s1e2').value||0,
+                s2e1: document.getElementById('s2e1').value||0, s2e2: document.getElementById('s2e2').value||0,
+                s3e1: document.getElementById('s3e1').value||0, s3e2: document.getElementById('s3e2').value||0
             };
-
             try {
                 await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(datos) });
-                alert("¡Éxito! El ranking se actualizará en unos segundos.");
-                location.reload();
-            } catch (err) { alert("Error de conexión"); btn.disabled = false; btn.innerText = "GUARDAR"; }
+                alert("¡Éxito!"); location.reload();
+            } catch (err) { alert("Error"); btn.disabled = false; }
         };
 
         init();
