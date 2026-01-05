@@ -5,15 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <title>PadelTour</title>
+    <title>PadelTour Pro</title>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .tab-active { color: #4f46e5; border-bottom: 2px solid #4f46e5; }
         input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
         .avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: #e2e8f0; }
-        .input-set { width: 1.75rem; height: 2rem; background: white; border-radius: 0.25rem; text-align: center; font-weight: bold; font-size: 0.875rem; border: 1px solid transparent; }
-        .input-error { border-color: #ef4444 !important; background-color: #fef2f2; }
-        th { cursor: pointer; transition: background 0.2s; }
+        .input-set { width: 1.75rem; height: 2rem; background: white; border-radius: 0.25rem; text-align: center; font-weight: bold; font-size: 0.875rem; border: 1px solid #cbd5e1; }
+        th { cursor: pointer; white-space: nowrap; }
         th:hover { background-color: #f1f5f9; }
     </style>
 </head>
@@ -23,7 +22,7 @@
         <div class="max-w-5xl mx-auto px-4 pt-4">
             <div class="flex justify-between items-center mb-4">
                 <h1 class="text-xl font-800 text-indigo-600 tracking-tighter uppercase cursor-pointer" onclick="location.reload()">PadelTour</h1>
-                <button onclick="document.getElementById('modal').style.display='flex'" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-s font-bold">+ RESULTADO</button>
+                <button onclick="abrirModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-s font-bold">+ RESULTADO</button>
             </div>
             <nav class="flex gap-6">
                 <button onclick="cambiarTab('clasificacion')" id="btn-tab-clas" class="pb-3 text-sm font-bold text-slate-400 tab-active">Clasificación</button>
@@ -36,23 +35,23 @@
         <select id="filtroAnio" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0"></select>
         <select id="filtroLugar" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0"><option value="">Pista</option></select>
         <select id="filtroJugador" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0"><option value="">Jugador</option></select>
-        <select id="filtroPareja" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0"><option value="">Pareja</option></select>
     </section>
 
     <main class="max-w-7xl mx-auto px-4">
         <div id="view-clasificacion" class="block overflow-x-auto">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 min-w-[600px]">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 min-w-[700px]">
                 <table class="w-full text-left text-xs">
                     <thead class="bg-slate-50 text-slate-400 font-bold uppercase">
                         <tr>
-                            <th class="p-4" onclick="ordenarTabla('n')">Jugador</th>
-                            <th class="p-4 text-center" onclick="ordenarTabla('pj')">PJ</th>
-                            <th class="p-4 text-center text-indigo-600" onclick="ordenarTabla('wr')">%V/D</th>
-                            <th class="p-4 text-center" onclick="ordenarTabla('v')">G</th>
-                            <th class="p-4 text-center text-red-400" onclick="ordenarTabla('d')">P</th>
+                            <th class="p-4 w-12">#</th>
+                            <th class="p-4" onclick="ordenarTabla('n')">Jugador <span id="sort-n"></span></th>
+                            <th class="p-4 text-center" onclick="ordenarTabla('pj')">PJ <span id="sort-pj"></span></th>
+                            <th class="p-4 text-center text-indigo-600" onclick="ordenarTabla('wr')">%V/D <span id="sort-wr"></span></th>
+                            <th class="p-4 text-center" onclick="ordenarTabla('v')">G <span id="sort-v"></span></th>
+                            <th class="p-4 text-center" onclick="ordenarTabla('d')">P <span id="sort-d"></span></th>
                             <th class="p-4 text-center">Racha</th>
-                            <th class="p-4 text-center" onclick="ordenarTabla('sr')">%S</th>
-                            <th class="p-4 text-center" onclick="ordenarTabla('jr')">%J</th>
+                            <th class="p-4 text-center" onclick="ordenarTabla('sr')">%S <span id="sort-sr"></span></th>
+                            <th class="p-4 text-center" onclick="ordenarTabla('jr')">%J <span id="sort-jr"></span></th>
                         </tr>
                     </thead>
                     <tbody id="tabla-body" class="divide-y divide-slate-50"></tbody>
@@ -66,46 +65,47 @@
     </main>
 
     <div id="modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[100] backdrop-blur-sm">
-        <div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl">
-            <h2 class="text-xl font-800 mb-6 text-center">Nuevo Partido</h2>
-            <form id="formPartido" class="space-y-5">
-                <input type="password" id="pass" placeholder="PIN" class="w-full p-3 bg-slate-50 rounded-xl border-0 text-sm text-center" required>
+        <div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl overflow-y-auto max-h-[90vh]">
+            <h2 id="modalTitle" class="text-xl font-800 mb-6 text-center italic">Nuevo Partido</h2>
+            <form id="formPartido" class="space-y-4">
+                <input type="hidden" id="editId">
+                <input type="password" id="pass" placeholder="PIN SEGURIDAD" class="w-full p-3 bg-slate-100 rounded-xl border-0 text-sm text-center font-bold" required>
                 
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2 text-center">
-                        <p class="text-[12px] font-bold text-indigo-500 uppercase">Pareja A</p>
-                        <select id="j1" class="w-full p-2 bg-slate-50 rounded-lg text-xs select-jugador" required onchange="validarJugadores()"></select>
-                        <select id="j2" class="w-full p-2 bg-slate-50 rounded-lg text-xs select-jugador" required onchange="validarJugadores()"></select>
+                    <div class="space-y-2 bg-indigo-50 p-3 rounded-2xl">
+                        <p class="text-[10px] font-bold text-indigo-500 uppercase text-center">Pareja A</p>
+                        <select id="j1" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
+                        <select id="j2" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
                     </div>
-                    <div class="space-y-2 text-center">
-                        <p class="text-[12px] font-bold text-indigo-500 uppercase">Pareja B</p>
-                        <select id="j3" class="w-full p-2 bg-slate-50 rounded-lg text-xs select-jugador" required onchange="validarJugadores()"></select>
-                        <select id="j4" class="w-full p-2 bg-slate-50 rounded-lg text-xs select-jugador" required onchange="validarJugadores()"></select>
-                    </div>
-                </div>
-
-                <div class="bg-slate-500 p-4 rounded-2xl">
-                    <div class="flex items-center justify-center gap-2" id="marcador-inputs">
-                        <div class="flex gap-1 bg-slate-400 p-1 rounded-lg">
-                            <input type="number" id="s1e1" placeholder="0" class="input-set" oninput="autoTab(this, 's1e2')">
-                            <input type="number" id="s1e2" placeholder="0" class="input-set" oninput="autoTab(this, 's2e1')">
-                        </div>
-                        <div class="flex gap-1 bg-slate-400 p-1 rounded-lg">
-                            <input type="number" id="s2e1" placeholder="0" class="input-set" oninput="autoTab(this, 's2e2')">
-                            <input type="number" id="s2e2" placeholder="0" class="input-set" oninput="autoTab(this, 's3e1')">
-                        </div>
-                        <div class="flex gap-1 bg-slate-400 p-1 rounded-lg">
-                            <input type="number" id="s3e1" placeholder="0" class="input-set" oninput="autoTab(this, 's3e2')">
-                            <input type="number" id="s3e2" placeholder="0" class="input-set">
-                        </div>
+                    <div class="space-y-2 bg-slate-50 p-3 rounded-2xl">
+                        <p class="text-[10px] font-bold text-slate-500 uppercase text-center">Pareja B</p>
+                        <select id="j3" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
+                        <select id="j4" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
                     </div>
                 </div>
 
-                <input list="listaLugares" id="lugarForm" placeholder="Pista" class="w-full p-3 bg-slate-50 rounded-xl text-sm" required>
+                <div class="bg-slate-900 p-4 rounded-2xl">
+                    <div class="flex items-center justify-center gap-2">
+                        <div class="flex gap-1 bg-slate-800 p-1 rounded-lg">
+                            <input type="number" id="s1e1" class="input-set" oninput="autoTab(this, 's1e2')">
+                            <input type="number" id="s1e2" class="input-set" oninput="autoTab(this, 's2e1')">
+                        </div>
+                        <div class="flex gap-1 bg-slate-800 p-1 rounded-lg">
+                            <input type="number" id="s2e1" class="input-set" oninput="autoTab(this, 's2e2')">
+                            <input type="number" id="s2e2" class="input-set" oninput="autoTab(this, 's3e1')">
+                        </div>
+                        <div class="flex gap-1 bg-slate-800 p-1 rounded-lg">
+                            <input type="number" id="s3e1" class="input-set" oninput="autoTab(this, 's3e2')">
+                            <input type="number" id="s3e2" class="input-set">
+                        </div>
+                    </div>
+                </div>
+
+                <input list="listaLugares" id="lugarForm" placeholder="Lugar / Pista" class="w-full p-3 bg-slate-100 rounded-xl text-sm" required>
                 <datalist id="listaLugares"></datalist>
 
-                <button id="btnSubmit" type="submit" class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold uppercase text-xs">Guardar</button>
-                <button type="button" onclick="document.getElementById('modal').style.display='none'" class="w-full text-slate-400 text-xs font-bold uppercase">Cerrar</button>
+                <button id="btnSubmit" type="submit" class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-lg shadow-indigo-200">Guardar Resultado</button>
+                <button type="button" onclick="cerrarModal()" class="w-full text-slate-400 text-xs font-bold uppercase py-2">Cancelar</button>
             </form>
         </div>
     </div>
@@ -113,17 +113,15 @@
     <script>
         const URL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=0&single=true&output=csv';
         const URL_JUGADORES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=1804776142&single=true&output=csv';
-        const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzqYBV7c0hvqqKV5RFG_6-JJpunziXs8NQH954P6QoyblpxVXp3InCLdAg7ITYZaOySqw/exec';
+        const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbxrcJFgz9NMF9hSmXB-tldlTuYhTb6IHz8PcmFKIxfKCFMGLY9cP1y0kuA8wMxcV9VrqQ/exec';
         const PIN_CORRECTO = "2023";
 
         let datosPartidos = [];
         let infoJugadores = {};
         let rankingActual = [];
-        let ordenConfig = { campo: 'wr', sentido: 1, clickCount: 0 };
+        let ordenConfig = { campo: 'wr', sentido: -1 }; // Por defecto %V/D descendente
 
-        function autoTab(current, nextId) {
-            if (current.value.length >= 1) document.getElementById(nextId).focus();
-        }
+        function autoTab(current, nextId) { if (current.value.length >= 1) document.getElementById(nextId).focus(); }
 
         async function init() {
             await cargarJugadores();
@@ -140,7 +138,10 @@
                 if(parts[1]) {
                     const nom = parts[1].trim();
                     infoJugadores[nom] = parts[2] ? parts[2].trim() : "";
-                    selects.forEach(s => s.innerHTML += `<option value="${nom}">${nom}</option>`);
+                    selects.forEach(s => {
+                        if(s.id === 'filtroJugador' && s.options.length === 1) s.innerHTML += `<option value="${nom}">${nom}</option>`;
+                        else if(s.classList.contains('select-jugador')) s.innerHTML += `<option value="${nom}">${nom}</option>`;
+                    });
                 }
             });
         }
@@ -152,32 +153,24 @@
             
             const anioActual = new Date().getFullYear().toString();
             const anios = [...new Set(datosPartidos.map(f => f[2]))].filter(Boolean).sort((a,b) => b-a);
-            
             const selAnio = document.getElementById('filtroAnio');
-            selAnio.innerHTML = '<option value="">Temporada</option>';
+            selAnio.innerHTML = '<option value="">Todos los años</option>';
             anios.forEach(a => selAnio.innerHTML += `<option value="${a}" ${a === anioActual ? 'selected' : ''}>${a}</option>`);
 
             const lugares = [...new Set(datosPartidos.map(f => f[3]))].filter(Boolean);
-            lugares.forEach(l => {
-                document.getElementById('filtroLugar').innerHTML += `<option value="${l}">${l}</option>`;
-                document.getElementById('listaLugares').innerHTML += `<option value="${l}">`;
-            });
+            document.getElementById('filtroLugar').innerHTML = '<option value="">Pista</option>' + lugares.map(l => `<option value="${l}">${l}</option>`).join('');
+            document.getElementById('listaLugares').innerHTML = lugares.map(l => `<option value="${l}">`).join('');
             
-            actualizarFiltroParejas(datosPartidos);
             aplicarFiltros();
         }
 
         function ordenarTabla(campo) {
             if (ordenConfig.campo === campo) {
-                ordenConfig.clickCount++;
+                ordenConfig.sentido *= -1;
             } else {
                 ordenConfig.campo = campo;
-                ordenConfig.clickCount = 1;
+                ordenConfig.sentido = -1;
             }
-            const estado = ordenConfig.clickCount % 3;
-            if (estado === 1) ordenConfig.sentido = 1;
-            else if (estado === 2) ordenConfig.sentido = -1;
-            else { ordenConfig.campo = 'wr'; ordenConfig.sentido = -1; ordenConfig.clickCount = 0; }
             renderizarRanking();
         }
 
@@ -185,16 +178,11 @@
             const fAnio = document.getElementById('filtroAnio').value;
             const fLugar = document.getElementById('filtroLugar').value;
             const fJug = document.getElementById('filtroJugador').value;
-            const fPareja = document.getElementById('filtroPareja').value;
 
             const filtrados = datosPartidos.filter(f => {
-                const p1 = [f[4].trim(), f[5].trim()].sort().join(' / ');
-                const p2 = [f[6].trim(), f[7].trim()].sort().join(' / ');
-                const matchAnio = !fAnio || f[2] === fAnio;
-                const matchLugar = !fLugar || f[3] === fLugar;
-                const matchJug = !fJug || [f[4],f[5],f[6],f[7]].map(n => n.trim()).includes(fJug);
-                const matchPar = !fPareja || (p1 === fPareja || p2 === fPareja);
-                return matchAnio && matchLugar && matchJug && matchPar;
+                return (!fAnio || f[2] === fAnio) && 
+                       (!fLugar || f[3] === fLugar) && 
+                       (!fJug || [f[4],f[5],f[6],f[7]].map(n => n.trim()).includes(fJug));
             });
             procesarStats(filtrados);
         }
@@ -204,11 +192,9 @@
             Object.keys(infoJugadores).forEach(n => stats[n] = {v:0, d:0, pj:0, sg:0, st:0, jg:0, jt:0, racha:[]});
 
             partidos.forEach(c => {
-                const s1e1 = parseInt(c[8])||0, s1e2 = parseInt(c[9])||0;
-                const s2e1 = parseInt(c[10])||0, s2e2 = parseInt(c[11])||0;
-                const s3e1 = parseInt(c[12])||0, s3e2 = parseInt(c[13])||0;
-                const setsE1 = (s1e1>s1e2?1:0)+(s2e1>s2e2?1:0)+(s3e1>s3e2?1:0);
-                const setsE2 = (s1e2>s1e1?1:0)+(s2e2>s2e1?1:0)+(s3e2>s3e1?1:0);
+                const s = c.map(v => parseInt(v) || 0);
+                const setsE1 = (s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0);
+                const setsE2 = (s[9]>s[8]?1:0)+(s[11]>s[10]?1:0)+(s[13]>s[12]?1:0);
                 const ganoE1 = setsE1 > setsE2;
 
                 const act = (n, g, sf, sc, jf, jc) => {
@@ -219,8 +205,8 @@
                     stats[n].jg += jf; stats[n].jt += (jf+jc);
                     stats[n].racha.push(g ? 'V' : 'D');
                 };
-                [c[4], c[5]].forEach(n => act(n, ganoE1, setsE1, setsE2, s1e1+s2e1+s3e1, s1e2+s2e2+s3e2));
-                [c[6], c[7]].forEach(n => act(n, !ganoE1, setsE2, setsE1, s1e2+s2e2+s3e2, s1e1+s2e1+s3e1));
+                [c[4], c[5]].forEach(n => act(n, ganoE1, setsE1, setsE2, s[8]+s[10]+s[12], s[9]+s[11]+s[13]));
+                [c[6], c[7]].forEach(n => act(n, !ganoE1, setsE2, setsE1, s[9]+s[11]+s[13], s[8]+s[10]+s[12]));
             });
 
             rankingActual = Object.keys(stats).filter(n => stats[n].pj > 0).map(n => ({
@@ -236,53 +222,51 @@
         }
 
         function renderizarRanking() {
+            // Actualizar indicadores visuales de flechas
+            document.querySelectorAll('th span').forEach(s => s.innerText = '');
+            const span = document.getElementById(`sort-${ordenConfig.campo}`);
+            if(span) span.innerText = ordenConfig.sentido === 1 ? ' ▲' : ' ▼';
+
             const sorted = [...rankingActual].sort((a,b) => {
                 let vA = a[ordenConfig.campo], vB = b[ordenConfig.campo];
                 if (typeof vA === 'string') return vA.localeCompare(vB) * ordenConfig.sentido;
                 return (vA - vB) * ordenConfig.sentido;
             });
 
-            document.getElementById('tabla-body').innerHTML = sorted.map(j => `
-                <tr class="hover:bg-slate-50">
+            document.getElementById('tabla-body').innerHTML = sorted.map((j, idx) => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="p-4 font-bold text-slate-400">#${idx + 1}</td>
                     <td class="p-4 flex items-center gap-3 cursor-pointer" onclick="verJugador('${j.n}')">
                         <img src="${infoJugadores[j.n] || 'https://via.placeholder.com/100'}" class="avatar">
                         <span class="font-bold text-indigo-600">${j.n}</span>
                     </td>
                     <td class="p-4 text-center">${j.pj}</td>
                     <td class="p-4 text-center font-bold text-indigo-600">${j.wr.toFixed(1)}%</td>
-                    <td class="p-4 text-center font-semibold text-emerald-600">${j.v}</td>
-                    <td class="p-4 text-center font-semibold text-red-400">${j.d}</td>
+                    <td class="p-4 text-center text-emerald-600 font-bold">${j.v}</td>
+                    <td class="p-4 text-center text-red-400 font-bold">${j.d}</td>
                     <td class="p-4 text-center">
-                        <div class="flex justify-center gap-1">
-                            ${j.ultimos.map(r => `<span class="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white ${r==='V'?'bg-emerald-500':'bg-red-500'}">${r}</span>`).join('')}
-                        </div>
+                        <div class="flex justify-center gap-1">${j.ultimos.map(r => `<span class="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white ${r==='V'?'bg-emerald-500':'bg-red-500'}">${r}</span>`).join('')}</div>
                     </td>
                     <td class="p-4 text-center">${j.sr.toFixed(0)}%</td>
                     <td class="p-4 text-center">${j.jr.toFixed(0)}%</td>
                 </tr>`).join('');
         }
 
-        function verJugador(nombre) {
-            document.getElementById('filtroAnio').value = new Date().getFullYear().toString();
-            document.getElementById('filtroJugador').value = nombre;
-            document.getElementById('filtroPareja').value = "";
-            document.getElementById('filtroLugar').value = "";
-            aplicarFiltros();
-            cambiarTab('historial');
-        }
-
         function renderizarHistorial(partidos) {
-            document.getElementById('historial-cards').innerHTML = [...partidos].reverse().map(c => {
-                const s1e1 = parseInt(c[8])||0, s1e2 = parseInt(c[9])||0, s2e1 = parseInt(c[10])||0, s2e2 = parseInt(c[11])||0, s3e1 = parseInt(c[12])||0, s3e2 = parseInt(c[13])||0;
-                const ganoE1 = ((s1e1>s1e2?1:0)+(s2e1>s2e2?1:0)+(s3e1>s3e2?1:0)) > ((s1e2>s1e1?1:0)+(s2e2>s2e1?1:0)+(s3e2>s3e1?1:0));
-
+            document.getElementById('historial-cards').innerHTML = [...partidos].reverse().map((c, index) => {
+                const s = c.map(v => parseInt(v) || 0);
+                const ganoE1 = ((s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0)) > ((s[9]>s[8]?1:0)+(s[11]>s[10]?1:0)+(s[13]>s[12]?1:0));
+                
                 return `
-                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3 h-fit">
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3 relative group">
+                    <button onclick="editarPartido('${c[0]}')" class="absolute top-3 right-3 text-slate-300 hover:text-indigo-600 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                    </button>
                     <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase"><span>${c[3]}</span> <span>${c[1]}</span></div>
-                    <div class="flex items-center justify-between gap-1 sm:gap-4">
+                    <div class="flex items-center justify-between gap-2">
                         <div class="text-[11px] w-1/3 leading-tight ${ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[4]} / ${c[5]}</div>
-                        <div class="bg-indigo-50 text-indigo-600 px-2 py-1 rounded-lg font-mono text-[10px] sm:text-[11px] font-bold whitespace-nowrap">
-                            ${s1e1}-${s1e2} | ${s2e1}-${s2e2}${ (s3e1>0 || s3e2>0) ? ` | ${s3e1}-${s3e2}` : ''}
+                        <div class="bg-indigo-50 text-indigo-600 px-2 py-1 rounded-lg font-mono text-[10px] font-bold">
+                            ${s[8]}-${s[9]} | ${s[10]}-${s[11]}${ (s[12]>0 || s[13]>0) ? ` | ${s[12]}-${s[13]}` : ''}
                         </div>
                         <div class="text-[11px] w-1/3 text-right leading-tight ${!ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[6]} / ${c[7]}</div>
                     </div>
@@ -290,111 +274,60 @@
             }).join('');
         }
 
-        function cambiarTab(tab) {
-            document.getElementById('view-clasificacion').style.display = tab === 'clasificacion' ? 'block' : 'none';
-            document.getElementById('view-historial').style.display = tab === 'historial' ? 'block' : 'none';
-            document.getElementById('btn-tab-clas').className = `pb-3 text-sm font-bold ${tab === 'clasificacion' ? 'tab-active' : 'text-slate-400'}`;
-            document.getElementById('btn-tab-hist').className = `pb-3 text-sm font-bold ${tab === 'historial' ? 'tab-active' : 'text-slate-400'}`;
-        }
-
-        function actualizarFiltroParejas(partidos) {
-            const parejasSet = new Set();
-            partidos.forEach(p => {
-                parejasSet.add([p[4].trim(), p[5].trim()].sort().join(' / '));
-                parejasSet.add([p[6].trim(), p[7].trim()].sort().join(' / '));
-            });
-            const sel = document.getElementById('filtroPareja');
-            sel.innerHTML = '<option value="">Parejas</option>';
-            [...parejasSet].sort().forEach(p => sel.innerHTML += `<option value="${p}">${p}</option>`);
-        }
-
         function validarJugadores() {
             const js = [document.getElementById('j1').value, document.getElementById('j2').value, 
                         document.getElementById('j3').value, document.getElementById('j4').value].filter(v => v !== "");
             const btn = document.getElementById('btnSubmit');
-            if(new Set(js).size !== js.length) {
-                btn.disabled = true; btn.style.background = "#ef4444"; btn.innerText = "REPETIDO";
-            } else {
-                btn.disabled = false; btn.style.background = "#4f46e5"; btn.innerText = "GUARDAR";
-            }
-        }
-
-        function validarMarcador() {
-            const sets = [
-                [document.getElementById('s1e1').value, document.getElementById('s1e2').value],
-                [document.getElementById('s2e1').value, document.getElementById('s2e2').value],
-                [document.getElementById('s3e1').value, document.getElementById('s3e2').value]
-            ];
-
-            let victoriasE1 = 0;
-            let victoriasE2 = 0;
+            const esRepetido = new Set(js).size !== js.length && js.length > 1;
             
-            for (let i = 0; i < 3; i++) {
-                const s1 = sets[i][0];
-                const s2 = sets[i][1];
-                
-                // Un set solo puede estar vacío o tener ambos números
-                if ((s1 !== "" && s2 === "") || (s1 === "" && s2 !== "")) {
-                    alert(`Error en Set ${i+1}: El resultado debe tener dos números.`);
-                    return false;
-                }
-                
-                if (s1 === "" && s2 === "") {
-                    // Si el tercer set está vacío es válido si alguien ya ganó 2 sets
-                    if (i === 2 && (victoriasE1 === 2 || victoriasE2 === 2)) continue;
-                    // Los dos primeros sets deben jugarse
-                    if (i < 2) {
-                        alert(`Error: Debes completar al menos los dos primeros sets.`);
-                        return false;
-                    }
-                    continue;
-                }
-
-                const n1 = parseInt(s1);
-                const n2 = parseInt(s2);
-
-                // Reglas de puntuación (6-0 a 6-4, o 7-5, o 7-6)
-                const max = Math.max(n1, n2);
-                const min = Math.min(n1, n2);
-                const diff = max - min;
-
-                let setValido = false;
-                if (max === 6 && diff >= 2) setValido = true;
-                else if (max === 7 && (n1 === 5 || n2 === 5 || n1 === 6 || n2 === 6)) setValido = true;
-
-                if (!setValido) {
-                    alert(`Error en Set ${i+1}: Resultado inválido (${n1}-${n2}). Recuerda: 6-X (mín. diff 2), 7-5 o 7-6.`);
-                    return false;
-                }
-
-                if (n1 > n2) victoriasE1++; else victoriasE2++;
-
-                // Si alguien gana 2-0, el tercer set DEBE estar vacío
-                if (i === 1 && (victoriasE1 === 2 || victoriasE2 === 2)) {
-                    if (document.getElementById('s3e1').value !== "" || document.getElementById('s3e2').value !== "") {
-                        alert("Error: No se puede jugar un tercer set si un equipo ya ganó 2-0.");
-                        return false;
-                    }
-                    break; 
-                }
+            if(esRepetido) {
+                btn.disabled = true; btn.style.background = "#ef4444"; btn.innerText = "HAY JUGADORES REPETIDOS";
+            } else {
+                btn.disabled = false; btn.style.background = "#4f46e5"; btn.innerText = document.getElementById('editId').value ? "ACTUALIZAR" : "GUARDAR RESULTADO";
             }
-
-            if (victoriasE1 < 2 && victoriasE2 < 2) {
-                alert("Error: El partido debe terminar con alguien ganando 2 sets.");
-                return false;
-            }
-
-            return true;
+            return !esRepetido;
         }
+
+        function editarPartido(id) {
+            const p = datosPartidos.find(x => x[0] === id);
+            if(!p) return;
+            abrirModal();
+            document.getElementById('modalTitle').innerText = "Editar Partido";
+            document.getElementById('editId').value = p[0];
+            document.getElementById('j1').value = p[4]; document.getElementById('j2').value = p[5];
+            document.getElementById('j3').value = p[6]; document.getElementById('j4').value = p[7];
+            document.getElementById('s1e1').value = p[8]; document.getElementById('s1e2').value = p[9];
+            document.getElementById('s2e1').value = p[10]; document.getElementById('s2e2').value = p[11];
+            document.getElementById('s3e1').value = p[12]; document.getElementById('s3e2').value = p[13];
+            document.getElementById('lugarForm').value = p[3];
+            validarJugadores();
+        }
+
+        function abrirModal() {
+            document.getElementById('formPartido').reset();
+            document.getElementById('editId').value = "";
+            document.getElementById('modalTitle').innerText = "Nuevo Partido";
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function cerrarModal() { document.getElementById('modal').style.display = 'none'; }
 
         document.getElementById('formPartido').onsubmit = async (e) => {
             e.preventDefault();
-            if (!validarMarcador()) return;
-            
+            const pin = document.getElementById('pass').value;
+            if(pin !== PIN_CORRECTO) {
+                alert("PIN INCORRECTO: No tienes permiso para guardar.");
+                return;
+            }
+
+            if(!validarJugadores()) return;
+
             const btn = document.getElementById('btnSubmit');
-            btn.disabled = true; btn.innerText = "...";
+            btn.disabled = true; btn.innerText = "ENVIANDO...";
+
             const datos = {
-                password: document.getElementById('pass').value,
+                id: document.getElementById('editId').value, // Si existe, el script de Apps Script lo usará para buscar la fila
+                password: pin,
                 fecha: new Date().toLocaleDateString('es-ES'),
                 temporada: new Date().getFullYear().toString(),
                 lugar: document.getElementById('lugarForm').value,
@@ -404,11 +337,25 @@
                 s2e1: document.getElementById('s2e1').value||0, s2e2: document.getElementById('s2e2').value||0,
                 s3e1: document.getElementById('s3e1').value||0, s3e2: document.getElementById('s3e2').value||0
             };
+
             try {
                 await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(datos) });
                 location.reload();
-            } catch (err) { alert("Error al conectar con el servidor"); btn.disabled = false; }
+            } catch (err) { alert("Error de red"); btn.disabled = false; }
         };
+
+        function verJugador(nombre) {
+            document.getElementById('filtroJugador').value = nombre;
+            aplicarFiltros();
+            cambiarTab('historial');
+        }
+
+        function cambiarTab(tab) {
+            document.getElementById('view-clasificacion').style.display = tab === 'clasificacion' ? 'block' : 'none';
+            document.getElementById('view-historial').style.display = tab === 'historial' ? 'block' : 'none';
+            document.getElementById('btn-tab-clas').className = `pb-3 text-sm font-bold ${tab === 'clasificacion' ? 'tab-active' : 'text-slate-400'}`;
+            document.getElementById('btn-tab-hist').className = `pb-3 text-sm font-bold ${tab === 'historial' ? 'tab-active' : 'text-slate-400'}`;
+        }
 
         init();
     </script>
