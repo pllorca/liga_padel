@@ -81,11 +81,9 @@
                         <select id="j4" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
                     </div>
                 </div>
-                <div class="bg-slate-500 p-4 rounded-2xl flex justify-center gap-4">
+                <div class="bg-indigo-900 p-4 rounded-2xl flex justify-center gap-2">
                     <div class="flex gap-1"><input type="number" id="s1e1" class="input-set" oninput="autoTab(this,'s1e2')"><input type="number" id="s1e2" class="input-set" oninput="autoTab(this,'s2e1')"></div>
-																 
                     <div class="flex gap-1"><input type="number" id="s2e1" class="input-set" oninput="autoTab(this,'s2e2')"><input type="number" id="s2e2" class="input-set" oninput="autoTab(this,'s3e1')"></div>
-																 
                     <div class="flex gap-1"><input type="number" id="s3e1" class="input-set" oninput="autoTab(this,'s3e2')"><input type="number" id="s3e2" class="input-set"></div>
                 </div>
                 <input list="listaLugares" id="lugarForm" placeholder="Pista" class="w-full p-3 bg-slate-100 rounded-xl text-sm" required>
@@ -107,22 +105,25 @@
         let rankingMostrado = [];
         let ordenConfig = { campo: 'wr', sentido: -1 };
 
-        function autoTab(c, n) { if(c.value.length >= 1) document.getElementById(n).focus(); }
+        function autoTab(c, n) { if(c.value.length >= 1) { const el = document.getElementById(n); if(el) el.focus(); } }
 
         function parsearFecha(f) {
             if(!f) return 0;
-            if(f.includes('/')) {
-                const parts = f.split('/');
+            const s = f.trim();
+            if(s.includes('/')) {
+                const parts = s.split('/');
                 return new Date(parts[2], parts[1]-1, parts[0]).getTime();
             }
-            return new Date(f).getTime();
+            return new Date(s).getTime();
         }
 
         async function init() {
-				 
-            await cargarJugadores();
-            await cargarPartidos();
-																	 
+            try {
+                await cargarJugadores();
+                await cargarPartidos();
+            } catch (err) {
+                console.error("Error en init:", err);
+            }
         }
 
         async function cargarJugadores() {
@@ -143,11 +144,11 @@
         async function cargarPartidos() {
             const res = await fetch(URL_CSV);
             const texto = await res.text();
-													 
-			
-            datosPartidos = texto.split('\n').slice(1).map(f => f.split(',')).filter(f => f.length > 5);
+																										
             
-            // ORDENAR HISTORIAL POR FECHA (Más nuevo arriba)
+            // Limpieza de datos y mapeo
+            datosPartidos = texto.split('\n').slice(1).map(f => f.split(',')).filter(f => f.length > 7 && f[4]);
+            
             datosPartidos.sort((a, b) => parsearFecha(b[1]) - parsearFecha(a[1]));
 
             const anioActual = new Date().getFullYear().toString();
@@ -160,8 +161,8 @@
 
             const parejasSet = new Set();
             datosPartidos.forEach(p => {
-                parejasSet.add([p[4].trim(), p[5].trim()].sort().join(' / '));
-                parejasSet.add([p[6].trim(), p[7].trim()].sort().join(' / '));
+                if(p[4] && p[5]) parejasSet.add([p[4].trim(), p[5].trim()].sort().join(' / '));
+                if(p[6] && p[7]) parejasSet.add([p[6].trim(), p[7].trim()].sort().join(' / '));
             });
             document.getElementById('filtroPareja').innerHTML = '<option value="">Parejas</option>' + [...parejasSet].sort().map(p => `<option value="${p}">${p}</option>`).join('');
 
@@ -191,6 +192,7 @@
 
             partidos.forEach(c => {
                 const s = c.map(v => parseInt(v) || 0);
+                // Lógica de sets: [8]-[9], [10]-[11], [12]-[13]
                 const sE1 = (s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0);
                 const sE2 = (s[9]>s[8]?1:0)+(s[11]>s[10]?1:0)+(s[13]>s[12]?1:0);
                 const ganoE1 = sE1 > sE2;
@@ -202,11 +204,13 @@
                     stats[n].jg += jf; stats[n].jt += (jf+jc);
                     stats[n].racha.push(g ? 'V' : 'D');
                 };
-                [c[4], c[5]].forEach(n => act(n, ganoE1, sE1, sE2, s[8]+s[10]+s[12], s[9]+s[11]+s[13]));
-                [c[6], c[7]].forEach(n => act(n, !ganoE1, sE2, sE1, s[9]+s[11]+s[13], s[8]+s[10]+s[12]));
+                if(c[4]) act(c[4], ganoE1, sE1, sE2, s[8]+s[10]+s[12], s[9]+s[11]+s[13]);
+                if(c[5]) act(c[5], ganoE1, sE1, sE2, s[8]+s[10]+s[12], s[9]+s[11]+s[13]);
+                if(c[6]) act(c[6], !ganoE1, sE2, sE1, s[9]+s[11]+s[13], s[8]+s[10]+s[12]);
+                if(c[7]) act(c[7], !ganoE1, sE2, sE1, s[9]+s[11]+s[13], s[8]+s[10]+s[12]);
             });
 
-            // RANKING FIJO basado en %V/D
+										  
             rankingMostrado = Object.keys(stats).filter(n => stats[n].pj > 0).map(n => ({
                 n, ...stats[n],
                 wr: (stats[n].v/stats[n].pj)*100,
@@ -256,7 +260,9 @@
         function renderizarHistorial(partidos) {
             document.getElementById('historial-cards').innerHTML = partidos.map(c => {
                 const s = c.map(v => parseInt(v) || 0);
-                const ganoE1 = ((s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0)) > ((s[9]>s[8]?1:0)+(s[11]>s[10]?1:0)+(s[13]>s[12]?1:0));
+                const sE1 = (s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0);
+                const sE2 = (s[9]>s[8]?1:0)+(s[11]>s[10]?1:0)+(s[13]>s[12]?1:0);
+                const ganoE1 = sE1 > sE2;
                 return `
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3">
                     <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase"><span>${c[1]}</span> <span>${c[3]}</span></div>
@@ -281,6 +287,7 @@
             btn.innerText = esRepetido ? "JUGADORES REPETIDOS" : "GUARDAR RESULTADO";
             return !esRepetido;
         }
+
         function abrirModal() {
             document.getElementById('formPartido').reset();
             document.getElementById('fechaForm').value = new Date().toISOString().split('T')[0];
@@ -314,8 +321,13 @@
                 s3e1: document.getElementById('s3e1').value||0, s3e2: document.getElementById('s3e2').value||0
             };
 
-            await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(datos) });
-            location.reload();
+            try {
+                await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(datos) });
+                location.reload();
+            } catch (err) {
+                alert("Error al guardar");
+                btn.disabled = false; btn.innerText = "Guardar Resultado";
+            }
         };
 
         function verJugador(n) { document.getElementById('filtroJugador').value = n; aplicarFiltros(); cambiarTab('historial'); }
@@ -330,4 +342,3 @@
     </script>
 </body>
 </html>
-
