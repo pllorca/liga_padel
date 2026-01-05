@@ -2,186 +2,347 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+						
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Ranking Tenis Amigos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Tenis Pro Stats</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .tab-active { color: #4f46e5; border-bottom: 2px solid #4f46e5; }
+        input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; } /* Quitar flechas */
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-slate-50 text-slate-900 pb-20">
 
-    <nav class="bg-white shadow-sm p-4 sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="font-bold text-xl text-indigo-600">🎾 Tenis Tour</h1>
-            <button onclick="document.getElementById('modal').style.display='flex'" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Añadir Resultado</button>
-        </div>
-    </nav>
-
-    <main class="max-w-4xl mx-auto p-4">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
-            <div class="p-4 border-b border-gray-50 bg-gray-50/50">
-                <h2 class="font-bold text-gray-700">Clasificación General</h2>
+    <header class="bg-white border-b sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 pt-4">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-xl font-800 text-indigo-600 tracking-tighter uppercase">TenisTour</h1>
+                <button onclick="document.getElementById('modal').style.display='flex'" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold">+ RESULTADO</button>
+																												  
             </div>
-            <table class="w-full text-left">
-                <thead class="text-xs text-gray-400 uppercase bg-gray-50">
-                    <tr>
-                        <th class="p-4">Jugador</th>
-                        <th class="p-4">V/D (%)</th>
-                        <th class="p-4">Sets (%)</th>
-                        <th class="p-4">Juegos (%)</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-body">
-                    </tbody>
-            </table>
+		  
+            <nav class="flex gap-6">
+                <button onclick="cambiarTab('clasificacion')" id="btn-tab-clas" class="pb-3 text-sm font-bold text-slate-400 tab-active">Clasificación</button>
+                <button onclick="cambiarTab('historial')" id="btn-tab-hist" class="pb-3 text-sm font-bold text-slate-400">Historial</button>
+            </nav>
         </div>
+    </header>
 
-        <h2 class="font-bold text-gray-700 mb-4 text-lg">Historial de Partidos</h2>
-        <div id="historial" class="grid gap-4"></div>
+    <section class="max-w-5xl mx-auto px-4 py-4 flex gap-2 overflow-x-auto">
+        <select id="filtroAnio" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none">
+            <option value="">Todos los años</option>
+        </select>
+        <select id="filtroLugar" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none">
+            <option value="">Todos los lugares</option>
+        </select>
+        <select id="filtroJugador" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none">
+            <option value="">Cualquier jugador</option>
+        </select>
+    </section>
+
+    <main class="max-w-5xl mx-auto px-4">
+        <div id="view-clasificacion" class="block">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 text-slate-400 font-bold uppercase">
+                            <tr>
+                                <th class="p-4">Jugador</th>
+                                <th class="p-4 text-center">PJ</th>
+							 
+					   
+											 
+												  
+					   
+		   
+										   
+						  
+					  
+											 
+													
+						
+			  
+						  
+					  
+											 
+													
+						
+			 
+		   
+														 
+						  
+					  
+											 
+													
+						
+			  
+						  
+					  
+											 
+                                <th class="p-4 text-center">V</th>
+                                <th class="p-4 text-center">P</th>
+			 
+		   
+							   
+							
+						
+								  
+                                <th class="p-4 text-center text-indigo-600">V/D %</th>
+							 
+						 
+								   
+                                <th class="p-4 text-center">Sets %</th>
+							  
+						  
+									
+                                <th class="p-4 text-center">Juegos %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-body" class="divide-y divide-slate-50"></tbody>
+                    </table>
+                </div>
+								
+																														  
+								
+																				  
+																	   
+				 
+            </div>
+        </div>
+				
+												
+																																													
+																																		
+
+        <div id="view-historial" class="hidden">
+            <div id="historial-cards" class="grid gap-3 md:grid-cols-2"></div>
+        </div>
     </main>
+									   
+												 
+					   
+																  
+															   
 
-    <div id="modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-[100]">
-        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
-            <h2 class="text-xl font-bold mb-4">Nuevo Partido</h2>
-            <form id="formPartido" class="space-y-3">
-                <input type="password" id="pass" placeholder="Contraseña Admin" class="w-full p-2 border rounded-lg" required>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="j1" placeholder="Equipo 1 - Jug 1" class="p-2 border rounded-lg text-sm" required>
-                    <input type="text" id="j2" placeholder="Equipo 1 - Jug 2" class="p-2 border rounded-lg text-sm" required>
+    <div id="modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[100] backdrop-blur-sm">
+        <div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl">
+            <h2 class="text-xl font-800 mb-6 italic">Añadir Partido</h2>
+            <form id="formPartido" class="space-y-4">
+                <input type="password" id="pass" placeholder="PIN Admin" class="w-full p-3 bg-slate-50 rounded-xl border-0 text-sm" required>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <p class="text-[10px] font-bold text-indigo-500 uppercase">Pareja A</p>
+                        <select id="j1" class="w-full p-2 bg-slate-50 rounded-lg text-xs border-0 select-jugador"></select>
+                        <select id="j2" class="w-full p-2 bg-slate-50 rounded-lg text-xs border-0 select-jugador"></select>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-[10px] font-bold text-indigo-500 uppercase">Pareja B</p>
+                        <select id="j3" class="w-full p-2 bg-slate-50 rounded-lg text-xs border-0 select-jugador"></select>
+                        <select id="j4" class="w-full p-2 bg-slate-50 rounded-lg text-xs border-0 select-jugador"></select>
+                    </div>
                 </div>
-                <div class="grid grid-cols-2 gap-2 border-t pt-2">
-                    <input type="text" id="j3" placeholder="Equipo 2 - Jug 1" class="p-2 border rounded-lg text-sm" required>
-                    <input type="text" id="j4" placeholder="Equipo 2 - Jug 2" class="p-2 border rounded-lg text-sm" required>
+
+                <div class="space-y-3 pt-4 border-t">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase text-center tracking-widest">Resultado por Sets</p>
+                    <div class="flex justify-center items-center gap-4">
+                        <div class="flex items-center bg-slate-50 p-2 rounded-xl">
+                            <input type="number" id="s1e1" class="w-8 bg-transparent text-center font-bold">
+                            <span class="text-slate-300 mx-1">-</span>
+                            <input type="number" id="s1e2" class="w-8 bg-transparent text-center font-bold">
+                        </div>
+                        <div class="flex items-center bg-slate-50 p-2 rounded-xl">
+                            <input type="number" id="s2e1" class="w-8 bg-transparent text-center font-bold">
+                            <span class="text-slate-300 mx-1">-</span>
+                            <input type="number" id="s2e2" class="w-8 bg-transparent text-center font-bold">
+                        </div>
+                        <div class="flex items-center bg-slate-50 p-2 rounded-xl">
+                            <input type="number" id="s3e1" class="w-8 bg-transparent text-center font-bold">
+                            <span class="text-slate-300 mx-1">-</span>
+                            <input type="number" id="s3e2" class="w-8 bg-transparent text-center font-bold">
+                        </div>
+                    </div>
                 </div>
-                <div class="flex gap-2">
-                    <input type="number" id="s1e1" placeholder="S1 E1" class="w-1/4 p-2 border rounded text-center">
-                    <input type="number" id="s1e2" placeholder="S1 E2" class="w-1/4 p-2 border rounded text-center">
-                    <input type="number" id="s2e1" placeholder="S2 E1" class="w-1/4 p-2 border rounded text-center">
-                    <input type="number" id="s2e2" placeholder="S2 E2" class="w-1/4 p-2 border rounded text-center">
-                </div>
-                <button type="submit" class="w-full bg-indigo-600 text-white p-3 rounded-xl font-bold mt-4">Guardar en Google Sheets</button>
-                <button type="button" onclick="document.getElementById('modal').style.display='none'" class="w-full text-gray-400 text-sm">Cerrar</button>
+
+                <input type="text" id="lugarForm" placeholder="Lugar (Club)" class="w-full p-3 bg-slate-50 rounded-xl border-0 text-sm">
+
+                <button type="submit" class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold shadow-lg shadow-indigo-100 uppercase text-xs tracking-widest">Guardar en Cloud</button>
+                <button type="button" onclick="document.getElementById('modal').style.display='none'" class="w-full text-slate-400 text-xs font-bold">CANCELAR</button>
             </form>
         </div>
     </div>
 
     <script>
-       // 1. CONFIGURACIÓN: Pega aquí tus URLs
-const URL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=0&single=true&output=csv'; 
-const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbxvM4dVfNMp3hXS7DynHPzCrIsiICIT-CTQZQhW91fp3KGE0zlxTcSIdalFSTFXQ8yMKg/exec';
+        const URL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=0&single=true&output=csv';
+        const URL_JUGADORES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=1804776142&single=true&output=csv';
+        let datosOriginales = [];
 
-// 2. FUNCIÓN PARA CARGAR Y CALCULAR (Tu lógica actual mejorada)
-async function cargarDatos() {
-    try {
-        const res = await fetch(URL_CSV);
-        const texto = await res.text();
-        const filas = texto.split('\n').slice(1);
-        let stats = {};
-        const historialDiv = document.getElementById('historial');
-        historialDiv.innerHTML = ""; // Limpiar antes de cargar
+        async function init() {
+            await cargarSelectores();
+            await cargarDatos();
+        }
 
-        filas.forEach(fila => {
-            const c = fila.split(',');
-            if (c.length < 10) return;
-
-            const jugadoresPartidos = [c[4].trim(), c[5].trim(), c[6].trim(), c[7].trim()];
+        async function cargarSelectores() {
+            const res = await fetch(URL_JUGADORES);
+            const texto = await res.text();
+            const nombres = texto.split('\n').slice(1).map(n => n.trim());
+            const selects = document.querySelectorAll('.select-jugador, #filtroJugador');
             
-            jugadoresPartidos.forEach(j => {
-                if (!stats[j]) stats[j] = { victorias: 0, partidos: 0, setsG: 0, setsT: 0, juegosG: 0, juegosT: 0 };
+            nombres.forEach(nombre => {
+                selects.forEach(s => s.innerHTML += `<option value="${nombre}">${nombre}</option>`);
+            });
+        }
+
+        function cambiarTab(tab) {
+            document.getElementById('view-clasificacion').style.display = tab === 'clasificacion' ? 'block' : 'none';
+            document.getElementById('view-historial').style.display = tab === 'historial' ? 'block' : 'none';
+            document.getElementById('btn-tab-clas').classList.toggle('tab-active', tab === 'clasificacion');
+            document.getElementById('btn-tab-hist').classList.toggle('tab-active', tab === 'historial');
+        }
+
+        async function cargarDatos() {
+            const res = await fetch(URL_CSV);
+            const texto = await res.text();
+            datosOriginales = texto.split('\n').slice(1).map(f => f.split(','));
+            
+            // Llenar filtros dinámicos (Año y Lugar)
+            const anios = [...new Set(datosOriginales.map(f => f[2]))].filter(Boolean);
+            const lugares = [...new Set(datosOriginales.map(f => f[3]))].filter(Boolean);
+            
+            anios.forEach(a => document.getElementById('filtroAnio').innerHTML += `<option value="${a}">${a}</option>`);
+            lugares.forEach(l => document.getElementById('filtroLugar').innerHTML += `<option value="${l}">${l}</option>`);
+            
+            aplicarFiltros();
+        }
+
+        function aplicarFiltros() {
+            const fAnio = document.getElementById('filtroAnio').value;
+            const fLugar = document.getElementById('filtroLugar').value;
+            const fJug = document.getElementById('filtroJugador').value;
+														   
+												 
+															 
+			  
+
+            const filtrados = datosOriginales.filter(f => {
+                const matchAnio = !fAnio || f[2] === fAnio;
+                const matchLugar = !fLugar || f[3] === fLugar;
+                const matchJug = !fJug || [f[4],f[5],f[6],f[7]].includes(fJug);
+                return matchAnio && matchLugar && matchJug;
             });
 
-            const s1e1 = parseInt(c[8]) || 0, s1e2 = parseInt(c[9]) || 0;
-            const s2e1 = parseInt(c[10]) || 0, s2e2 = parseInt(c[11]) || 0;
-            const s3e1 = parseInt(c[12]) || 0, s3e2 = parseInt(c[13]) || 0;
+            procesarEstadisticas(filtrados);
+            pintarHistorial(filtrados);
+        }
 
-            const setsE1 = (s1e1 > s1e2 ? 1 : 0) + (s2e1 > s2e2 ? 1 : 0) + (s3e1 > s3e2 ? 1 : 0);
-            const setsE2 = (s1e2 > s1e1 ? 1 : 0) + (s2e2 > s2e1 ? 1 : 0) + (s3e2 > s3e1 ? 1 : 0);
-            const ganoE1 = setsE1 > setsE2;
+        function procesarEstadisticas(partidos) {
+            let stats = {};
+            partidos.forEach(c => {
+				
+                const j = [c[4], c[5], c[6], c[7]];
+                j.forEach(n => { if(!stats[n]) stats[n] = {v:0, p:0, pj:0, sg:0, st:0, jg:0, jt:0} });
+																																								
+				  
+		   
 
-            const actualizar = (jugador, gano, sFavor, sContra, jFavor, jContra) => {
-                stats[jugador].partidos++;
-                if (gano) stats[jugador].victorias++;
-                stats[jugador].setsG += sFavor;
-                stats[jugador].setsT += (sFavor + sContra);
-                stats[jugador].juegosG += jFavor;
-                stats[jugador].juegosT += (jFavor + jContra);
-            };
+                const s1e1 = parseInt(c[8])||0, s1e2 = parseInt(c[9])||0;
+                const s2e1 = parseInt(c[10])||0, s2e2 = parseInt(c[11])||0;
+                const s3e1 = parseInt(c[12])||0, s3e2 = parseInt(c[13])||0;
+																			 
+																				  
+																			 
 
-            const jE1 = s1e1 + s2e1 + s3e1;
-            const jE2 = s1e2 + s2e2 + s3e2;
+                const setsE1 = (s1e1>s1e2?1:0)+(s2e1>s2e2?1:0)+(s3e1>s3e2?1:0);
+                const setsE2 = (s1e2>s1e1?1:0)+(s2e2>s2e1?1:0)+(s3e2>s3e1?1:0);
+                const ganoE1 = setsE1 > setsE2;
+								
+									 
+																		   
+																		  
+																								 
+																								   
+				 
+		   
+															  
+ 
 
-            [c[4].trim(), c[5].trim()].forEach(j => actualizar(j, ganoE1, setsE1, setsE2, jE1, jE2));
-            [c[6].trim(), c[7].trim()].forEach(j => actualizar(j, !ganoE1, setsE2, setsE1, jE2, jE1));
+                const act = (n, g, sf, sc, jf, jc) => {
+                    stats[n].pj++; g ? stats[n].v++ : stats[n].p++;
+                    stats[n].sg += sf; stats[n].st += (sf+sc);
+                    stats[n].jg += jf; stats[n].jt += (jf+jc);
+                };
+								   
+						
 
-            // Pintar Historial
-            historialDiv.innerHTML += `
-                <div class="bg-white p-4 rounded-xl border border-gray-100 flex justify-between items-center shadow-sm text-sm">
-                    <div><span class="font-bold">${c[4]}-${c[5]}</span> vs <span class="text-gray-500">${c[6]}-${c[7]}</span></div>
-                    <div class="font-mono bg-indigo-50 text-indigo-700 px-2 py-1 rounded">${s1e1}-${s1e2} / ${s2e1}-${s2e2} ${s3e1||s3e2 ? '/ '+s3e1+'-'+s3e2 : ''}</div>
-                </div>`;
-        });
+                [c[4], c[5]].forEach(n => act(n, ganoE1, setsE1, setsE2, s1e1+s2e1+s3e1, s1e2+s2e2+s3e2));
+                [c[6], c[7]].forEach(n => act(n, !ganoE1, setsE2, setsE1, s1e2+s2e2+s3e2, s1e1+s2e1+s3e1));
+            });
+												
+												
+												
+													
+													
+													
+													
+													  
+											  
+	  
 
-        const ranking = Object.keys(stats).map(nombre => ({
-            nombre,
-            winRate: (stats[nombre].victorias / stats[nombre].partidos) * 100 || 0,
-            setsRate: (stats[nombre].setsG / stats[nombre].setsT) * 100 || 0,
-            juegosRate: (stats[nombre].juegosG / stats[nombre].juegosT) * 100 || 0
-        })).sort((a, b) => b.winRate - a.winRate || b.setsRate - a.setsRate);
+            const ranking = Object.keys(stats).map(n => ({
+                n, ...stats[n],
+                wr: (stats[n].v/stats[n].pj)*100 || 0,
+                sr: (stats[n].sg/stats[n].st)*100 || 0,
+                jr: (stats[n].jg/stats[n].jt)*100 || 0
+            })).sort((a,b) => b.wr - a.wr || b.sr - a.sr);
+																						 
+																
+						 
+					  
+				   
+															
+			   
+									 
+							 
+	 
+  
 
-        const tabla = document.getElementById('tabla-body');
-        tabla.innerHTML = "";
-        ranking.forEach(jugador => {
-            tabla.innerHTML += `
-                <tr class="border-b">
-                    <td class="p-4 font-bold text-indigo-900">${jugador.nombre}</td>
-                    <td class="p-4 text-center">${jugador.winRate.toFixed(1)}%</td>
-                    <td class="p-4 text-center text-gray-500 text-sm">${jugador.setsRate.toFixed(1)}%</td>
-                    <td class="p-4 text-center text-gray-400 text-xs">${jugador.juegosRate.toFixed(1)}%</td>
-                </tr>`;
-        });
-    } catch (e) { console.error("Error cargando datos:", e); }
-}
+			  
+			 
+            const tbody = document.getElementById('tabla-body');
+            tbody.innerHTML = ranking.map(j => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="p-4 font-bold text-slate-700">${j.n}</td>
+                    <td class="p-4 text-center">${j.pj}</td>
+                    <td class="p-4 text-center text-green-600 font-bold">${j.v}</td>
+                    <td class="p-4 text-center text-red-400">${j.p}</td>
+                    <td class="p-4 text-center font-bold text-indigo-600">${j.wr.toFixed(1)}%</td>
+                    <td class="p-4 text-center text-slate-500 font-medium">${j.sr.toFixed(1)}%</td>
+                    <td class="p-4 text-center text-slate-400">${j.jr.toFixed(1)}%</td>
+                </tr>
+            `).join('');
+        }
 
-// 3. FUNCIÓN PARA ENVIAR DATOS (El formulario del Admin)
-document.getElementById('formPartido').onsubmit = async (e) => {
-    e.preventDefault();
-    const btn = e.target.querySelector('button[type="submit"]');
-    const originalText = btn.innerText;
-    btn.innerText = "Guardando...";
-    btn.disabled = true;
+        function pintarHistorial(partidos) {
+            const container = document.getElementById('historial-cards');
+            container.innerHTML = partidos.reverse().map(c => `
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                    <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase mb-3">
+                        <span>${c[3]}</span> <span>${c[1]}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="flex-1 text-sm font-bold text-slate-700">${c[4]} / ${c[5]}</div>
+                        <div class="flex gap-1.5 font-mono text-[11px] font-bold bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg">
+                            <span>${c[8]}-${c[9]}</span> <span>${c[10]}-${c[11]}</span> ${c[12]||c[13]?`<span>${c[12]}-${c[13]}</span>`:''}
+                        </div>
+                        <div class="flex-1 text-sm font-bold text-slate-700 text-right">${c[6]} / ${c[7]}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-    const datos = {
-        password: document.getElementById('pass').value,
-        j1: document.getElementById('j1').value,
-        j2: document.getElementById('j2').value,
-        j3: document.getElementById('j3').value,
-        j4: document.getElementById('j4').value,
-        s1e1: document.getElementById('s1e1').value,
-        s1e2: document.getElementById('s1e2').value,
-        s2e1: document.getElementById('s2e1').value,
-        s2e2: document.getElementById('s2e2').value,
-        temporada: "2024", // Puedes hacerlo dinámico
-        fecha: new Date().toLocaleDateString()
-    };
-
-    try {
-        await fetch(URL_SCRIPT, {
-            method: 'POST',
-            mode: 'no-cors', // Importante para evitar bloqueos de Google
-            body: JSON.stringify(datos)
-        });
-        alert("¡Partido guardado! Los cambios pueden tardar unos minutos en aparecer.");
-        document.getElementById('modal').style.display = 'none';
-        e.target.reset();
-        cargarDatos();
-    } catch (err) {
-        alert("Error al enviar. Revisa la URL del script.");
-    } finally {
-        btn.innerText = originalText;
-        btn.disabled = false;
-    }
-};
-
-cargarDatos();
+        init();
     </script>
 </body>
-
 </html>
