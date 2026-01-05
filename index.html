@@ -64,64 +64,124 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN (Pega tus URLs aquí)
-        const URL_CSV = 'TU_URL_DE_PUBLICAR_EN_LA_WEB_CSV_AQUÍ';
-        const URL_SCRIPT = 'TU_URL_DE_APPS_SCRIPT_DESPLEGADA_AQUÍ';
+       // 1. CONFIGURACIÓN: Pega aquí tus URLs
+const URL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=0&single=true&output=csv'; 
+const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbxvM4dVfNMp3hXS7DynHPzCrIsiICIT-CTQZQhW91fp3KGE0zlxTcSIdalFSTFXQ8yMKg/exec';
 
-        async function cargarDatos() {
-            const res = await fetch(URL_CSV);
-            const texto = await res.text();
-            const filas = texto.split('\n').slice(1);
+// 2. FUNCIÓN PARA CARGAR Y CALCULAR (Tu lógica actual mejorada)
+async function cargarDatos() {
+    try {
+        const res = await fetch(URL_CSV);
+        const texto = await res.text();
+        const filas = texto.split('\n').slice(1);
+        let stats = {};
+        const historialDiv = document.getElementById('historial');
+        historialDiv.innerHTML = ""; // Limpiar antes de cargar
+
+        filas.forEach(fila => {
+            const c = fila.split(',');
+            if (c.length < 10) return;
+
+            const jugadoresPartidos = [c[4].trim(), c[5].trim(), c[6].trim(), c[7].trim()];
             
-            let jugadores = {};
-
-            filas.forEach(f => {
-                const c = f.split(',');
-                if(c.length < 10) return;
-                
-                // Procesar ganadores de set
-                let s1 = parseInt(c[8]) > parseInt(c[9]) ? 1 : 0;
-                let s2 = parseInt(c[10]) > parseInt(c[11]) ? 1 : 0;
-                let s3 = (c[12] && parseInt(c[12]) > parseInt(c[13])) ? 1 : 0;
-                
-                let ganoE1 = (s1 + s2 + s3) >= 2;
-                let listaE1 = [c[4], c[5]];
-                let listaE2 = [c[6], c[7]];
-
-                // Lógica de puntos simplificada por jugador
-                // (Aquí se calcularían los % de sets y juegos ganados)
-                // ... lógica de acumulación ...
-                // Para no alargar el código, esto pintará el historial
-                document.getElementById('historial').innerHTML += `
-                    <div class="bg-white p-4 rounded-xl border border-gray-100 flex justify-between items-center shadow-sm">
-                        <div class="text-sm"><b>${c[4]}-${c[5]}</b> vs <b>${c[6]}-${c[7]}</b></div>
-                        <div class="text-indigo-600 font-bold">${c[8]}-${c[9]} | ${c[10]}-${c[11]}</div>
-                    </div>
-                `;
+            jugadoresPartidos.forEach(j => {
+                if (!stats[j]) stats[j] = { victorias: 0, partidos: 0, setsG: 0, setsT: 0, juegosG: 0, juegosT: 0 };
             });
-        }
 
-        document.getElementById('formPartido').onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
-            btn.innerText = "Enviando...";
-            
-            const payload = {
-                password: document.getElementById('pass').value,
-                j1: document.getElementById('j1').value,
-                j2: document.getElementById('j2').value,
-                // ... añadir resto de campos ...
+            const s1e1 = parseInt(c[8]) || 0, s1e2 = parseInt(c[9]) || 0;
+            const s2e1 = parseInt(c[10]) || 0, s2e2 = parseInt(c[11]) || 0;
+            const s3e1 = parseInt(c[12]) || 0, s3e2 = parseInt(c[13]) || 0;
+
+            const setsE1 = (s1e1 > s1e2 ? 1 : 0) + (s2e1 > s2e2 ? 1 : 0) + (s3e1 > s3e2 ? 1 : 0);
+            const setsE2 = (s1e2 > s1e1 ? 1 : 0) + (s2e2 > s2e1 ? 1 : 0) + (s3e2 > s3e1 ? 1 : 0);
+            const ganoE1 = setsE1 > setsE2;
+
+            const actualizar = (jugador, gano, sFavor, sContra, jFavor, jContra) => {
+                stats[jugador].partidos++;
+                if (gano) stats[jugador].victorias++;
+                stats[jugador].setsG += sFavor;
+                stats[jugador].setsT += (sFavor + sContra);
+                stats[jugador].juegosG += jFavor;
+                stats[jugador].juegosT += (jFavor + jContra);
             };
 
-            await fetch(URL_SCRIPT, {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            });
-            
-            location.reload();
-        };
+            const jE1 = s1e1 + s2e1 + s3e1;
+            const jE2 = s1e2 + s2e2 + s3e2;
 
+            [c[4].trim(), c[5].trim()].forEach(j => actualizar(j, ganoE1, setsE1, setsE2, jE1, jE2));
+            [c[6].trim(), c[7].trim()].forEach(j => actualizar(j, !ganoE1, setsE2, setsE1, jE2, jE1));
+
+            // Pintar Historial
+            historialDiv.innerHTML += `
+                <div class="bg-white p-4 rounded-xl border border-gray-100 flex justify-between items-center shadow-sm text-sm">
+                    <div><span class="font-bold">${c[4]}-${c[5]}</span> vs <span class="text-gray-500">${c[6]}-${c[7]}</span></div>
+                    <div class="font-mono bg-indigo-50 text-indigo-700 px-2 py-1 rounded">${s1e1}-${s1e2} / ${s2e1}-${s2e2} ${s3e1||s3e2 ? '/ '+s3e1+'-'+s3e2 : ''}</div>
+                </div>`;
+        });
+
+        const ranking = Object.keys(stats).map(nombre => ({
+            nombre,
+            winRate: (stats[nombre].victorias / stats[nombre].partidos) * 100 || 0,
+            setsRate: (stats[nombre].setsG / stats[nombre].setsT) * 100 || 0,
+            juegosRate: (stats[nombre].juegosG / stats[nombre].juegosT) * 100 || 0
+        })).sort((a, b) => b.winRate - a.winRate || b.setsRate - a.setsRate);
+
+        const tabla = document.getElementById('tabla-body');
+        tabla.innerHTML = "";
+        ranking.forEach(jugador => {
+            tabla.innerHTML += `
+                <tr class="border-b">
+                    <td class="p-4 font-bold text-indigo-900">${jugador.nombre}</td>
+                    <td class="p-4 text-center">${jugador.winRate.toFixed(1)}%</td>
+                    <td class="p-4 text-center text-gray-500 text-sm">${jugador.setsRate.toFixed(1)}%</td>
+                    <td class="p-4 text-center text-gray-400 text-xs">${jugador.juegosRate.toFixed(1)}%</td>
+                </tr>`;
+        });
+    } catch (e) { console.error("Error cargando datos:", e); }
+}
+
+// 3. FUNCIÓN PARA ENVIAR DATOS (El formulario del Admin)
+document.getElementById('formPartido').onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerText;
+    btn.innerText = "Guardando...";
+    btn.disabled = true;
+
+    const datos = {
+        password: document.getElementById('pass').value,
+        j1: document.getElementById('j1').value,
+        j2: document.getElementById('j2').value,
+        j3: document.getElementById('j3').value,
+        j4: document.getElementById('j4').value,
+        s1e1: document.getElementById('s1e1').value,
+        s1e2: document.getElementById('s1e2').value,
+        s2e1: document.getElementById('s2e1').value,
+        s2e2: document.getElementById('s2e2').value,
+        temporada: "2024", // Puedes hacerlo dinámico
+        fecha: new Date().toLocaleDateString()
+    };
+
+    try {
+        await fetch(URL_SCRIPT, {
+            method: 'POST',
+            mode: 'no-cors', // Importante para evitar bloqueos de Google
+            body: JSON.stringify(datos)
+        });
+        alert("¡Partido guardado! Los cambios pueden tardar unos minutos en aparecer.");
+        document.getElementById('modal').style.display = 'none';
+        e.target.reset();
         cargarDatos();
+    } catch (err) {
+        alert("Error al enviar. Revisa la URL del script.");
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
+};
+
+cargarDatos();
     </script>
 </body>
+
 </html>
