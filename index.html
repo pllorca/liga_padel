@@ -1,116 +1,205 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <title>TenisTour - Estadísticas</title>
-    <style>
+	<head>
+		<meta charset="UTF-8">
+			<meta name="viewport"
+			      content="width=device-width, initial-scale=1.0">
+				<script src="https://cdn.tailwindcss.com"/>
+				<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
+				      rel="stylesheet">
+					<title>TenisTour - Estadísticas Pro</title>
+					<style>
         body { font-family: 'Inter', sans-serif; }
         .tab-active { color: #4f46e5; border-bottom: 2px solid #4f46e5; }
         input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
         .avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: #e2e8f0; }
+        .input-set { width: 1.75rem; height: 2rem; background: white; border-radius: 0.25rem; text-align: center; font-weight: bold; font-size: 0.875rem; }
     </style>
-</head>
-<body class="bg-slate-50 text-slate-900 pb-20">
-
-    <header class="bg-white border-b sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-4 pt-4">
-            <div class="flex justify-between items-center mb-4">
-                <h1 class="text-xl font-800 text-indigo-600 tracking-tighter uppercase">TenisTour</h1>
-                <button onclick="document.getElementById('modal').style.display='flex'" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold">+ RESULTADO</button>
-            </div>
-            <nav class="flex gap-6">
-                <button onclick="cambiarTab('clasificacion')" id="btn-tab-clas" class="pb-3 text-sm font-bold text-slate-400 tab-active">Clasificación</button>
-                <button onclick="cambiarTab('historial')" id="btn-tab-hist" class="pb-3 text-sm font-bold text-slate-400">Historial</button>
-            </nav>
-        </div>
-    </header>
-
-    <section class="max-w-5xl mx-auto px-4 py-4 flex gap-2 overflow-x-auto">
-        <select id="filtroAnio" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0"><option value="">Años</option></select>
-        <select id="filtroLugar" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0"><option value="">Lugares</option></select>
-        <select id="filtroJugador" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0"><option value="">Jugador</option></select>
-        <select id="filtroPareja" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0"><option value="">Pareja</option></select>
-    </section>
-
-    <main class="max-w-5xl mx-auto px-4">
-        <div id="view-clasificacion" class="block">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-50 text-slate-400 font-bold uppercase">
-                        <tr>
-                            <th class="p-4">Jugador</th>
-                            <th class="p-4 text-center">PJ</th>
-                            <th class="p-4 text-center text-indigo-600">V/D %</th>
-                            <th class="p-4 text-center">Racha (5)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-body" class="divide-y divide-slate-50"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="view-historial" class="hidden">
-            <div id="historial-cards" class="grid gap-3 md:grid-cols-2"></div>
-        </div>
-    </main>
-
-    <div id="modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[100] backdrop-blur-sm">
-        <div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl">
-            <h2 class="text-xl font-800 mb-6 italic text-center">Añadir Partido</h2>
-            <form id="formPartido" class="space-y-5">
-                <input type="password" id="pass" placeholder="PIN de Seguridad" class="w-full p-3 bg-slate-50 rounded-xl border-0 text-sm text-center" required>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <p class="text-[10px] font-bold text-indigo-500 uppercase text-center">Pareja A</p>
-                        <select id="j1" class="w-full p-2 bg-slate-50 rounded-lg text-xs border-0 select-jugador" required onchange="validarJugadores()"></select>
-                        <select id="j2" class="w-full p-2 bg-slate-50 rounded-lg text-xs border-0 select-jugador" required onchange="validarJugadores()"></select>
-                    </div>
-                    <div class="space-y-2">
-                        <p class="text-[10px] font-bold text-indigo-500 uppercase text-center">Pareja B</p>
-                        <select id="j3" class="w-full p-2 bg-slate-50 rounded-lg text-xs border-0 select-jugador" required onchange="validarJugadores()"></select>
-                        <select id="j4" class="w-full p-2 bg-slate-50 rounded-lg text-xs border-0 select-jugador" required onchange="validarJugadores()"></select>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900 p-4 rounded-2xl">
-                    <div class="flex items-center justify-center gap-2">
-                        <div class="flex gap-1 bg-slate-800 p-1 rounded-lg">
-                            <input type="number" id="s1e1" placeholder="0" class="w-7 h-8 bg-white rounded text-center font-bold text-sm">
-                            <span class="text-white self-center">-</span>
-                            <input type="number" id="s1e2" placeholder="0" class="w-7 h-8 bg-white rounded text-center font-bold text-sm">
+				</head>
+				<body class="bg-slate-50 text-slate-900 pb-20">
+					<header class="bg-white border-b sticky top-0 z-50">
+						<div class="max-w-5xl mx-auto px-4 pt-4">
+							<div class="flex justify-between items-center mb-4">
+								<h1 class="text-xl font-800 text-indigo-600 tracking-tighter uppercase">TenisTour</h1>
+								<button onclick="document.getElementById('modal').style.display='flex'"
+								        class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold">+ RESULTADO</button>
+							</div>
+							<nav class="flex gap-6">
+								<button onclick="cambiarTab('clasificacion')"
+								        id="btn-tab-clas"
+								        class="pb-3 text-sm font-bold text-slate-400 tab-active">Clasificación</button>
+								<button onclick="cambiarTab('historial')"
+								        id="btn-tab-hist"
+								        class="pb-3 text-sm font-bold text-slate-400">Historial</button>
+							</nav>
+						</div>
+					</header>
+					<section class="max-w-5xl mx-auto px-4 py-4 flex gap-2 overflow-x-auto">
+						<select id="filtroAnio"
+						        onchange="aplicarFiltros()"
+						        class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0">
+							<option value="">Años</option>
+						</select>
+						<select id="filtroLugar"
+						        onchange="aplicarFiltros()"
+						        class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0">
+							<option value="">Lugares</option>
+						</select>
+						<select id="filtroJugador"
+						        onchange="aplicarFiltros()"
+						        class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0">
+							<option value="">Jugador</option>
+						</select>
+						<select id="filtroPareja"
+						        onchange="aplicarFiltros()"
+						        class="bg-white border p-2 rounded-lg text-xs font-medium outline-none shrink-0">
+							<option value="">Pareja</option>
+						</select>
+					</section>
+					<main class="max-w-7xl mx-auto px-4">
+						<div id="view-clasificacion"
+						     class="block overflow-x-auto">
+							<div class="bg-white rounded-2xl shadow-sm border border-slate-100 min-w-[600px]">
+								<table class="w-full text-left text-xs">
+									<thead class="bg-slate-50 text-slate-400 font-bold uppercase">
+										<tr>
+											<th class="p-4">Jugador</th>
+											<th class="p-4 text-center">PJ</th>
+											<th class="p-4 text-center text-indigo-600">%V/D</th>
+											<th class="p-4 text-center">G</th>
+											<th class="p-4 text-center text-red-400">P</th>
+											<th class="p-4 text-center">Racha</th>
+											<th class="p-4 text-center">%S</th>
+											<th class="p-4 text-center">%J</th>
+										</tr>
+									</thead>
+									<tbody id="tabla-body"
+									       class="divide-y divide-slate-50"/>
+								</table>
+							</div>
+						</div>
+						<div id="view-historial"
+						     class="hidden">
+							<div id="historial-cards"
+							     class="grid gap-3 md:grid-cols-2"/>
+						</div>
+					</main>
+					<div id="modal"
+					     class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[100] backdrop-blur-sm">
+						<div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl">
+							<h2 class="text-xl font-800 mb-6 italic text-center">Nuevo Partido</h2>
+							<form id="formPartido"
+							      class="space-y-5">
+								<input type="password"
+								       id="pass"
+								       placeholder="PIN"
+								       class="w-full p-3 bg-slate-50 rounded-xl border-0 text-sm text-center"
+								       required>
+								<div
+								     class="grid grid-cols-2 gap-4">
+									<div class="space-y-2 text-center">
+										<p class="text-[10px] font-bold text-indigo-500 uppercase">Pareja A</p>
+										<select id="j1"
+										        class="w-full p-2 bg-slate-50 rounded-lg text-xs select-jugador"
+										        required
+										        onchange="validarJugadores()"/>
+										<select id="j2"
+										        class="w-full p-2 bg-slate-50 rounded-lg text-xs select-jugador"
+										        required
+										        onchange="validarJugadores()"/>
+									</div>
+									<div class="space-y-2 text-center">
+										<p class="text-[10px] font-bold text-indigo-500 uppercase">Pareja B</p>
+										<select id="j3"
+										        class="w-full p-2 bg-slate-50 rounded-lg text-xs select-jugador"
+										        required
+										        onchange="validarJugadores()"/>
+										<select id="j4"
+										        class="w-full p-2 bg-slate-50 rounded-lg text-xs select-jugador"
+										        required
+										        onchange="validarJugadores()"/>
+									</div>
+								</div>
+								<div class="bg-slate-900 p-4 rounded-2xl">
+									<div class="flex items-center justify-center gap-2"
+									     id="marcador-inputs">
+										<div class="flex gap-1 bg-slate-800 p-1 rounded-lg">
+											<input type="number"
+											       id="s1e1"
+											       placeholder="0"
+											       class="input-set"
+											       oninput="autoTab(this, 's1e2')">
+												<input type="number"
+												       id="s1e2"
+												       placeholder="0"
+												       class="input-set"
+												       oninput="autoTab(this, 's2e1')">
+			  
+		
+	   
+		  
+		 
+			   
                         </div>
-                        <div class="w-1"></div>
-                        <div class="flex gap-1 bg-slate-800 p-1 rounded-lg">
-                            <input type="number" id="s2e1" placeholder="0" class="w-7 h-8 bg-white rounded text-center font-bold text-sm">
-                            <span class="text-white self-center">-</span>
-                            <input type="number" id="s2e2" placeholder="0" class="w-7 h-8 bg-white rounded text-center font-bold text-sm">
+							  
+												<div class="flex gap-1 bg-slate-800 p-1 rounded-lg">
+													<input type="number"
+													       id="s2e1"
+													       placeholder="0"
+													       class="input-set"
+													       oninput="autoTab(this, 's2e2')">
+														<input type="number"
+														       id="s2e2"
+														       placeholder="0"
+														       class="input-set"
+														       oninput="autoTab(this, 's3e1')">
+			 
+		  
+		 
+		 
+		   
+			  
                         </div>
-                        <div class="w-1"></div>
-                        <div class="flex gap-1 bg-slate-800 p-1 rounded-lg">
-                            <input type="number" id="s3e1" placeholder="0" class="w-7 h-8 bg-white rounded text-center font-bold text-sm">
-                            <span class="text-white self-center">-</span>
-                            <input type="number" id="s3e2" placeholder="0" class="w-7 h-8 bg-white rounded text-center font-bold text-sm">
+								
+														<div class="flex gap-1 bg-slate-800 p-1 rounded-lg">
+															<input type="number"
+															       id="s3e1"
+															       placeholder="0"
+															       class="input-set"
+															       oninput="autoTab(this, 's3e2')">
+																<input type="number"
+																       id="s3e2"
+																       placeholder="0"
+																       class="input-set">
+			
+			   
+		 
+		
+		   
+		   
                         </div>
-                    </div>
-                    <p class="text-[8px] text-slate-400 text-center mt-2 uppercase font-bold tracking-widest">Set 1 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Set 2 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Set 3</p>
-                </div>
-
-                <div>
-                    <input list="listaLugares" id="lugarForm" placeholder="Lugar (Club)" class="w-full p-3 bg-slate-50 rounded-xl border-0 text-sm" required>
-                    <datalist id="listaLugares"></datalist>
-                </div>
-
-                <button id="btnSubmit" type="submit" class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold uppercase text-xs tracking-widest">Guardar Resultado</button>
-                <button type="button" onclick="document.getElementById('modal').style.display='none'" class="w-full text-slate-400 text-xs font-bold uppercase">Cancelar</button>
-            </form>
-        </div>
-    </div>
-
-    <script>
+															</div>
+																																															
+														</div>
+				   
+														<input list="listaLugares"
+														       id="lugarForm"
+														       placeholder="Lugar (Club)"
+														       class="w-full p-3 bg-slate-50 rounded-xl text-sm"
+														       required>
+														<datalist
+														          id="listaLugares"/>
+					
+														<button id="btnSubmit"
+														        type="submit"
+														        class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold uppercase text-xs">Guardar</button>
+														<button type="button"
+														        onclick="document.getElementById('modal').style.display='none'"
+														        class="w-full text-slate-400 text-xs font-bold uppercase">Cerrar</button>
+													</form>
+												</div>
+											</div>
+											<script>
         const URL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=0&single=true&output=csv';
         const URL_JUGADORES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=1804776142&single=true&output=csv';
         const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbxIDrYEHoeKwR3LEP09gSYY0muqnezB6HP96FFT_fRl42ZKURNnFJkkNY2uIJbIdO7mSQ/exec';
@@ -118,6 +207,12 @@
 
         let datosPartidos = [];
         let infoJugadores = {};
+
+        function autoTab(current, nextId) {
+            if (current.value.length >= 1) {
+                document.getElementById(nextId).focus();
+            }
+        }
 
         async function init() {
             await cargarJugadores();
@@ -129,12 +224,12 @@
             const texto = await res.text();
             const filas = texto.split('\n').slice(1);
             const selects = document.querySelectorAll('.select-jugador, #filtroJugador');
-            
+			
             filas.forEach(f => {
-                const [id, nombre, foto] = f.split(',');
-                if(nombre) {
-                    const nom = nombre.trim();
-                    infoJugadores[nom] = foto ? foto.trim() : "";
+                const parts = f.split(',');
+                if(parts[1]) {
+                    const nom = parts[1].trim();
+                    infoJugadores[nom] = parts[2] ? parts[2].trim() : "";
                     selects.forEach(s => s.innerHTML += `<option value="${nom}">${nom}</option>`);
                 }
             });
@@ -145,7 +240,7 @@
             const texto = await res.text();
             datosPartidos = texto.split('\n').slice(1).map(f => f.split(',')).filter(f => f.length > 5);
             
-            // Llenar filtros
+							 
             const anios = [...new Set(datosPartidos.map(f => f[2]))].filter(Boolean);
             const lugares = [...new Set(datosPartidos.map(f => f[3]))].filter(Boolean);
             
@@ -175,9 +270,9 @@
                         document.getElementById('j3').value, document.getElementById('j4').value].filter(v => v !== "");
             const btn = document.getElementById('btnSubmit');
             if(new Set(js).size !== js.length) {
-                btn.disabled = true; btn.classList.replace('bg-indigo-600', 'bg-red-500'); btn.innerText = "JUGADOR REPETIDO";
+                btn.disabled = true; btn.style.background = "#ef4444"; btn.innerText = "REPETIDO";
             } else {
-                btn.disabled = false; btn.classList.replace('bg-red-500', 'bg-indigo-600'); btn.innerText = "GUARDAR RESULTADO";
+                btn.disabled = false; btn.style.background = "#4f46e5"; btn.innerText = "GUARDAR";
             }
         }
 
@@ -208,68 +303,92 @@
 
         function pintarTablas(partidos) {
             let stats = {};
-            Object.keys(infoJugadores).forEach(n => stats[n] = {v:0, pj:0, sg:0, st:0, racha:[]});
+            Object.keys(infoJugadores).forEach(n => stats[n] = {v:0, d:0, pj:0, sg:0, st:0, jg:0, jt:0, racha:[]});
 
             partidos.forEach(c => {
                 const s1e1 = parseInt(c[8])||0, s1e2 = parseInt(c[9])||0;
                 const s2e1 = parseInt(c[10])||0, s2e2 = parseInt(c[11])||0;
                 const s3e1 = parseInt(c[12])||0, s3e2 = parseInt(c[13])||0;
+                
                 const setsE1 = (s1e1>s1e2?1:0)+(s2e1>s2e2?1:0)+(s3e1>s3e2?1:0);
                 const setsE2 = (s1e2>s1e1?1:0)+(s2e2>s2e1?1:0)+(s3e2>s3e1?1:0);
                 const ganoE1 = setsE1 > setsE2;
 
-                const act = (n, g, sf, sc) => {
+                const act = (n, g, sf, sc, jf, jc) => {
                     n = n.trim(); if(!stats[n]) return;
-                    stats[n].pj++; if(g) stats[n].v++;
+		   
+                    stats[n].pj++; 
+                    if(g) stats[n].v++; else stats[n].d++;
                     stats[n].sg += sf; stats[n].st += (sf+sc);
+                    stats[n].jg += jf; stats[n].jt += (jf+jc);
                     stats[n].racha.push(g ? 'V' : 'D');
                 };
-                [c[4], c[5]].forEach(n => act(n, ganoE1, setsE1, setsE2));
-                [c[6], c[7]].forEach(n => act(n, !ganoE1, setsE2, setsE1));
+
+                const totalJe1 = s1e1+s2e1+s3e1;
+                const totalJe2 = s1e2+s2e2+s3e2;
+
+                [c[4], c[5]].forEach(n => act(n, ganoE1, setsE1, setsE2, totalJe1, totalJe2));
+                [c[6], c[7]].forEach(n => act(n, !ganoE1, setsE2, setsE1, totalJe2, totalJe1));
             });
 
             const ranking = Object.keys(stats).filter(n => stats[n].pj > 0).map(n => ({
                 n, ...stats[n],
                 wr: (stats[n].v/stats[n].pj)*100,
-                sr: (stats[n].sg/stats[n].st)*100,
+                sr: (stats[n].sg/stats[n].st)*100 || 0,
+                jr: (stats[n].jg/stats[n].jt)*100 || 0,
                 ultimos: stats[n].racha.slice(-5).reverse()
             })).sort((a,b) => b.wr - a.wr || b.sr - a.sr);
 
             document.getElementById('tabla-body').innerHTML = ranking.map(j => `
                 <tr class="hover:bg-slate-50">
-                    <td class="p-4 flex items-center gap-3">
-                        <img src="${infoJugadores[j.n] || 'https://via.placeholder.com/100'}" class="avatar">
-                        <span class="font-bold">${j.n}</span>
-                    </td>
-                    <td class="p-4 text-center">${j.pj}</td>
-                    <td class="p-4 text-center font-bold text-indigo-600">${j.wr.toFixed(1)}%</td>
-                    <td class="p-4">
-                        <div class="flex justify-center gap-1">
+														<td class="p-4 flex items-center gap-3">
+															<img src="${infoJugadores[j.n] || 'https://via.placeholder.com/100'}"
+															     class="avatar">
+																<span class="font-bold">${j.n}</span>
+															</td>
+															<td class="p-4 text-center">${j.pj}</td>
+															<td class="p-4 text-center font-bold text-indigo-600">${j.wr.toFixed(1)}%</td>
+															<td class="p-4 text-center font-semibold text-emerald-600">${j.v}</td>
+															<td class="p-4 text-center font-semibold text-red-400">${j.d}</td>
+															<td class="p-4">
+																<div class="flex justify-center gap-1">
                             ${j.ultimos.map(r => `<span class="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white ${r==='V'?'bg-emerald-500':'bg-red-500'}">${r}</span>`).join('')}
                         </div>
-                    </td>
-                </tr>`).join('');
+															</td>
+															<td class="p-4 text-center">${j.sr.toFixed(0)}%</td>
+															<td class="p-4 text-center">${j.jr.toFixed(0)}%</td>
+														</tr>`).join('');
 
-            document.getElementById('historial-cards').innerHTML = [...partidos].reverse().map(c => `
+            document.getElementById('historial-cards').innerHTML = [...partidos].reverse().map(c => {
+                const s1e1 = parseInt(c[8])||0, s1e2 = parseInt(c[9])||0;
+                const s2e1 = parseInt(c[10])||0, s2e2 = parseInt(c[11])||0;
+                const s3e1 = parseInt(c[12])||0, s3e2 = parseInt(c[13])||0;
+                const ganoE1 = ((s1e1>s1e2?1:0)+(s2e1>s2e2?1:0)+(s3e1>s3e2?1:0)) > ((s1e2>s1e1?1:0)+(s2e2>s2e1?1:0)+(s3e2>s3e1?1:0));
+
+                return `
                 <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-                    <div class="flex justify-between text-[10px] font-bold text-slate-400 mb-3 uppercase"><span>${c[3]}</span> <span>${c[1]}</span></div>
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="text-[11px] font-bold text-slate-700 w-1/3">${c[4]} / ${c[5]}</div>
-                        <div class="bg-indigo-50 text-indigo-600 px-2 py-1 rounded-lg font-mono text-[11px] font-bold">
-                            ${c[8]}-${c[9]} | ${c[10]}-${c[11]} ${c[12]||c[13]?`| ${c[12]}-${c[13]}`:''}
+															<div class="flex justify-between text-[10px] font-bold text-slate-400 mb-3 uppercase">
+																<span>${c[3]}</span>
+																<span>${c[1]}</span>
+															</div>
+															<div class="flex items-center justify-between gap-2">
+																<div class="text-[11px] w-1/3 ${ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[4]} / ${c[5]}</div>
+																<div class="bg-indigo-50 text-indigo-600 px-2 py-1 rounded-lg font-mono text-[11px] font-bold">
+                            ${s1e1}-${s1e2} | ${s2e1}-${s2e2} ${ (s3e1>0 || s3e2>0) ? `| ${s3e1}-${s3e2}` : ''}
                         </div>
-                        <div class="text-[11px] font-bold text-slate-700 w-1/3 text-right">${c[6]} / ${c[7]}</div>
-                    </div>
-                </div>`).join('');
+																<div class="text-[11px] w-1/3 text-right ${!ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[6]} / ${c[7]}</div>
+															</div>
+														</div>`;
+            }).join('');
         }
 
         document.getElementById('formPartido').onsubmit = async (e) => {
             e.preventDefault();
-            if(document.getElementById('pass').value !== PIN_CORRECTO) return alert("PIN Incorrecto");
+																									  
             const btn = document.getElementById('btnSubmit');
-            btn.disabled = true; btn.innerText = "Enviando...";
+            btn.disabled = true; btn.innerText = "...";
             const datos = {
-                password: PIN_CORRECTO,
+                password: document.getElementById('pass').value,
                 fecha: new Date().toLocaleDateString('es-ES'),
                 temporada: new Date().getFullYear().toString(),
                 lugar: document.getElementById('lugarForm').value,
@@ -280,12 +399,12 @@
                 s3e1: document.getElementById('s3e1').value||0, s3e2: document.getElementById('s3e2').value||0
             };
             try {
-                await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(datos) });
-                alert("¡Éxito!"); location.reload();
+                const res = await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(datos) });
+                location.reload();
             } catch (err) { alert("Error"); btn.disabled = false; }
         };
 
         init();
     </script>
-</body>
-</html>
+												</body>
+											</html>
