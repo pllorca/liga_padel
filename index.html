@@ -7,7 +7,42 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <title>PadelTour Oficial</title>
     <style>
+	
         body { font-family: 'Inter', sans-serif; }
+		.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    margin-left: 4px;
+	vertical-align: middle; 
+    margin-top: -8px;
+    font-size: 8px;
+    border: 0px solid #6366f1;
+    color: #94A3B8;
+    border-radius: 50%;
+    cursor: help;
+    position: relative;
+}
+
+/* El globo de texto (tooltip) */
+.info-icon:active::after, .info-icon:hover::after {
+    content: attr(data-tooltip); /* Coge el texto de un atributo */
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+	transform: translateY(50%);
+    background: #868d98;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    z-index: 100;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
         .tab-active { color: #4f46e5; border-bottom: 2px solid #4f46e5; }
         input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
         .avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: #e2e8f0; }
@@ -46,10 +81,22 @@
                             <th class="p-4 w-10">#</th>
                             <th class="p-4" onclick="ordenarTabla('n')">Jugador <span id="sort-n"></span></th>
                             <th class="p-4 text-center" onclick="ordenarTabla('pj')">PJ <span id="sort-pj"></span></th>
-                            <th class="p-4 text-center text-indigo-600" onclick="ordenarTabla('wr')">%V/D <span id="sort-wr"></span></th>
+                            <th class="p-4 text-center text-indigo-600" onclick="ordenarTabla('wr')">
+								<div class="flex items-center justify-center">
+									<span>%V/D</span>
+									<span class="info-icon" data-tooltip="% de victorias" onclick="event.stopPropagation()">?</span>
+									<span id="sort-wr"></span>
+								</div>
+							</th>
                             <th class="p-4 text-center" onclick="ordenarTabla('v')">G <span id="sort-v"></span></th>
                             <th class="p-4 text-center text-red-400" onclick="ordenarTabla('d')">P <span id="sort-d"></span></th>
-                            <th class="p-4 text-center">Racha</th>
+                            <th class="p-4 text-center">
+								<div class="flex items-center justify-center">
+									<span>Racha</span>
+									<span class="info-icon" data-tooltip="Racha: izquierda el último" onclick="event.stopPropagation()">?</span>
+									<span id="sort-wr"></span>
+								</div>
+							</th>
                             <th class="p-4 text-center" onclick="ordenarTabla('sr')">%S <span id="sort-sr"></span></th>
                             <th class="p-4 text-center" onclick="ordenarTabla('jr')">%J <span id="sort-jr"></span></th>
                         </tr>
@@ -342,4 +389,3 @@
     </script>
 </body>
 </html>
-
