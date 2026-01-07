@@ -216,7 +216,7 @@
                 wr: (stats[n].v/stats[n].pj)*100,
                 sr: (stats[n].sg/stats[n].st)*100 || 0,
                 jr: (stats[n].jg/stats[n].jt)*100 || 0,
-                ultimos: stats[n].racha.slice(-5).reverse()
+                ultimos: stats[n].racha.slice(-5)
             })).sort((a,b) => b.wr - a.wr).map((j, i) => ({ ...j, rankFijo: i + 1 }));
 
             renderizarRanking();
@@ -342,3 +342,4 @@
     </script>
 </body>
 </html>
+
