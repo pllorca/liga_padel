@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
-	<head>
-		<meta charset="UTF-8">
-			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-				<script src="https://cdn.tailwindcss.com"/>
-				<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-					<title>PadelTour Oficial</title>
-					<style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>PadelTour Oficial</title>
+    <style>
         body { font-family: 'Inter', sans-serif; }
         .tab-active { color: #4f46e5; border-bottom: 2px solid #4f46e5; }
         input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
@@ -14,136 +14,91 @@
         .input-set { width: 1.8rem; height: 2.2rem; background: white; border-radius: 0.25rem; text-align: center; font-weight: bold; font-size: 0.9rem; border: 1px solid #cbd5e1; }
         th { cursor: pointer; transition: 0.2s; white-space: nowrap; }
     </style>
-				</head>
-				<body class="bg-slate-50 text-slate-900 pb-20">
+</head>
+<body class="bg-slate-50 text-slate-900 pb-20">
 
-					<header class="bg-white border-b sticky top-0 z-50">
-						<div class="max-w-5xl mx-auto px-4 pt-4">
-							<div class="flex justify-between items-center mb-4">
-								<h1 class="text-xl font-800 text-indigo-600 tracking-tighter uppercase cursor-pointer" onclick="location.reload()">Padel Tour</h1>
-								<button onclick="abrirModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-s font-bold">+ RESULTADO</button>
-							</div>
-							<nav class="flex gap-6">
-								<button onclick="cambiarTab('clasificacion')" id="btn-tab-clas" class="pb-3 text-sm font-bold text-slate-400 tab-active">Clasificación</button>
-								<button onclick="cambiarTab('historial')" id="btn-tab-hist" class="pb-3 text-sm font-bold text-slate-400">Partidos</button>
-							</nav>
-						</div>
-					</header>
-			 
-					<section class="max-w-5xl mx-auto px-4 py-4 flex gap-2 overflow-x-auto">
-						<select id="filtroAnio" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"/>
-						<select id="filtroLugar" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none">
-							<option value="">Pistas</option>
-						</select>
-						<select id="filtroJugador" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none">
-							<option value="">Jugadores</option>
-						</select>
-						<select id="filtroPareja" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none">
-							<option value="">Parejas</option>
-						</select>
-					</section>
-		  
-					<main class="max-w-7xl mx-auto px-4">
-						<div id="view-clasificacion" class="block overflow-x-auto">
-							<div class="bg-white rounded-2xl shadow-sm border border-slate-100 min-w-[750px]">
-								<table class="w-full text-left text-xs">
-									<thead class="bg-slate-50 text-slate-400 font-bold uppercase">
-										<tr>
-											<th class="p-4 w-10">#</th>
-											<th class="p-4" onclick="ordenarTabla('n')">Jugador <span id="sort-n"/>
-											</th>
-											<th class="p-4 text-center" onclick="ordenarTabla('pj')">PJ <span id="sort-pj"/>
-											</th>
-											<th class="p-4 text-center text-indigo-600" onclick="ordenarTabla('wr')">%V/D <span id="sort-wr"/>
-											</th>
-											<th class="p-4 text-center" onclick="ordenarTabla('v')">G <span id="sort-v"/>
-											</th>
-											<th class="p-4 text-center text-red-400" onclick="ordenarTabla('d')">P <span id="sort-d"/>
-											</th>
-											<th class="p-4 text-center">Racha</th>
-											<th class="p-4 text-center" onclick="ordenarTabla('sr')">%S <span id="sort-sr"/>
-											</th>
-											<th class="p-4 text-center" onclick="ordenarTabla('jr')">%J <span id="sort-jr"/>
-											</th>
-										</tr>
-									</thead>
-									<tbody id="tabla-body" class="divide-y divide-slate-50"/>
-								</table>
-							</div>
-						</div>
-						<div id="view-historial" class="hidden">
-							<div id="historial-cards" class="grid gap-3 md:grid-cols-2"/>
-						</div>
-					</main>
-																																											  
-					<div id="modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[100] backdrop-blur-sm">
-						<div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl relative">
-							<h2 class="text-xl font-800 mb-6 text-center italic">Nuevo Partido</h2>
-							<form id="formPartido" class="space-y-4">
-								<div class="grid grid-cols-2 gap-2">
-									<input type="password" id="pass" placeholder="PIN" class="p-3 bg-slate-100 rounded-xl border-0 text-sm text-center font-bold" required>
-									<input type="date" id="fechaForm" class="p-3 bg-slate-100 rounded-xl border-0 text-xs text-center font-bold" required>
-								</div>
-								<div class="grid grid-cols-2 gap-4">
-									<div class="space-y-2 bg-indigo-50 p-3 rounded-2xl">
-										<select id="j1" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"/>
-										<select id="j2" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"/>
-									</div>
-									<div class="space-y-2 bg-slate-50 p-3 rounded-2xl">
-										<select id="j3" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"/>
-										<select id="j4" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"/>
-									</div>
-								</div>
-								<div class="bg-indigo-900 p-4 rounded-2xl flex justify-center gap-2">
-									<div class="flex gap-1">
-										<input type="number" id="s1e1" class="input-set" oninput="autoTab(this,'s1e2')">
-											<input type="number" id="s1e2" class="input-set" oninput="autoTab(this,'s2e1')"/>
-											<div class="flex gap-1">
-												<input type="number" id="s2e1" class="input-set" oninput="autoTab(this,'s2e2')">
-													<input type="number" id="s2e2" class="input-set" oninput="autoTab(this,'s3e1')"/>
-													<div class="flex gap-1">
-														<input type="number" id="s3e1" class="input-set" oninput="autoTab(this,'s3e2')">
-															<input type="number" id="s3e2" class="input-set"/>
-														</div>
-														<input list="listaLugares" id="lugarForm" placeholder="Pista" class="w-full p-3 bg-slate-100 rounded-xl text-sm" required>
-														<datalist id="listaLugares"/>
-														<button id="btnSubmit" type="submit" class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-lg">Guardar Resultado</button>
-														<button type="button" onclick="cerrarModal()" class="w-full text-slate-400 text-xs font-bold uppercase py-2">Cancelar</button>
-													</form>
-												</div>
-											</div>
-				  
-											<script>
-								   
-																			  
+    <header class="bg-white border-b sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 pt-4">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-xl font-800 text-indigo-600 tracking-tighter uppercase cursor-pointer" onclick="location.reload()">Padel Tour</h1>
+                <button onclick="abrirModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-s font-bold">+ RESULTADO</button>
+            </div>
+            <nav class="flex gap-6">
+                <button onclick="cambiarTab('clasificacion')" id="btn-tab-clas" class="pb-3 text-sm font-bold text-slate-400 tab-active">Clasificación</button>
+                <button onclick="cambiarTab('historial')" id="btn-tab-hist" class="pb-3 text-sm font-bold text-slate-400">Partidos</button>
+            </nav>
+        </div>
+    </header>
 
+    <section class="max-w-5xl mx-auto px-4 py-4 flex gap-2 overflow-x-auto">
+        <select id="filtroAnio" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"></select>
+        <select id="filtroLugar" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"><option value="">Pistas</option></select>
+        <select id="filtroJugador" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"><option value="">Jugadores</option></select>
+        <select id="filtroPareja" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"><option value="">Parejas</option></select>
+    </section>
+
+    <main class="max-w-7xl mx-auto px-4">
+        <div id="view-clasificacion" class="block overflow-x-auto">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 min-w-[750px]">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-50 text-slate-400 font-bold uppercase">
+                        <tr>
+                            <th class="p-4 w-10">#</th>
+                            <th class="p-4" onclick="ordenarTabla('n')">Jugador <span id="sort-n"></span></th>
+                            <th class="p-4 text-center" onclick="ordenarTabla('pj')">PJ <span id="sort-pj"></span></th>
+                            <th class="p-4 text-center text-indigo-600" onclick="ordenarTabla('wr')">%V/D <span id="sort-wr"></span></th>
+                            <th class="p-4 text-center" onclick="ordenarTabla('v')">G <span id="sort-v"></span></th>
+                            <th class="p-4 text-center text-red-400" onclick="ordenarTabla('d')">P <span id="sort-d"></span></th>
+                            <th class="p-4 text-center">Racha</th>
+                            <th class="p-4 text-center" onclick="ordenarTabla('sr')">%S <span id="sort-sr"></span></th>
+                            <th class="p-4 text-center" onclick="ordenarTabla('jr')">%J <span id="sort-jr"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-body" class="divide-y divide-slate-50"></tbody>
+                </table>
+            </div>
+        </div>
+        <div id="view-historial" class="hidden">
+            <div id="historial-cards" class="grid gap-3 md:grid-cols-2"></div>
+        </div>
+    </main>
+
+    <div id="modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[100] backdrop-blur-sm">
+        <div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl relative">
+            <h2 class="text-xl font-800 mb-6 text-center italic">Nuevo Partido</h2>
+            <form id="formPartido" class="space-y-4">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="password" id="pass" placeholder="PIN" class="p-3 bg-slate-100 rounded-xl border-0 text-sm text-center font-bold" required>
+                    <input type="date" id="fechaForm" class="p-3 bg-slate-100 rounded-xl border-0 text-xs text-center font-bold" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2 bg-indigo-50 p-3 rounded-2xl">
+                        <select id="j1" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
+                        <select id="j2" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
+                    </div>
+                    <div class="space-y-2 bg-slate-50 p-3 rounded-2xl">
+                        <select id="j3" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
+                        <select id="j4" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
+                    </div>
+                </div>
+                <div class="bg-indigo-900 p-4 rounded-2xl flex justify-center gap-2">
+                    <div class="flex gap-1"><input type="number" id="s1e1" class="input-set" oninput="autoTab(this,'s1e2')"><input type="number" id="s1e2" class="input-set" oninput="autoTab(this,'s2e1')"></div>
+                    <div class="flex gap-1"><input type="number" id="s2e1" class="input-set" oninput="autoTab(this,'s2e2')"><input type="number" id="s2e2" class="input-set" oninput="autoTab(this,'s3e1')"></div>
+                    <div class="flex gap-1"><input type="number" id="s3e1" class="input-set" oninput="autoTab(this,'s3e2')"><input type="number" id="s3e2" class="input-set"></div>
+                </div>
+                <input list="listaLugares" id="lugarForm" placeholder="Pista" class="w-full p-3 bg-slate-100 rounded-xl text-sm" required>
+                <datalist id="listaLugares"></datalist>
+                <button id="btnSubmit" type="submit" class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-lg">Guardar Resultado</button>
+                <button type="button" onclick="cerrarModal()" class="w-full text-slate-400 text-xs font-bold uppercase py-2">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
         const URL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=0&single=true&output=csv';
         const URL_JUGADORES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=1804776142&single=true&output=csv';
         const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzqYBV7c0hvqqKV5RFG_6-JJpunziXs8NQH954P6QoyblpxVXp3InCLdAg7ITYZaOySqw/exec';
         const PIN_CORRECTO = "2023";
-
-								 
-						   
-						
-																  
-																	   
-																	 
-																	
-														 
-			  
-					   
-																										   
-																														
-																												
-																												  
-																												
-																												
-																												 
-																												
-	
-			 
-		  
-
 
         let datosPartidos = [];
         let infoJugadores = {};
@@ -172,20 +127,10 @@
         }
 
         async function cargarJugadores() {
-					  
-							 
-																					   
-																						  
-					
             const res = await fetch(URL_JUGADORES);
             const texto = await res.text();
-			 
-
             const filas = texto.split('\n').slice(1);
             const selects = document.querySelectorAll('.select-jugador, #filtroJugador');
-			 // Limpiar selects
-            selects.forEach(s => s.innerHTML = '<option value="">Jugadores</option>'			  																 
-
             filas.forEach(f => {
                 const parts = f.split(',');
                 if(parts[1]) {
@@ -197,10 +142,6 @@
         }
 
         async function cargarPartidos() {
-					  
-							 
-																						 
-					
             const res = await fetch(URL_CSV);
             const texto = await res.text();
 																										
@@ -212,9 +153,9 @@
 
             const anioActual = new Date().getFullYear().toString();
             const anios = [...new Set(datosPartidos.map(f => f[2]))].filter(Boolean).sort((a,b) => b-a);
-            document.getElementById('filtroAnio').innerHTML = '<option value="">Años</option>' + anios.map(a => `<option value="${a}" ${a===anioActual ?'selected' :'' }>${a}< option>`).join(''); const lugares=[...new Set(datosPartidos.map(f=> f[3]))].filter(Boolean);
-
-										  
+            document.getElementById('filtroAnio').innerHTML = '<option value="">Años</option>' + anios.map(a => `<option value="${a}" ${a === anioActual ? 'selected' : ''}>${a}</option>`).join('');
+            
+            const lugares = [...new Set(datosPartidos.map(f => f[3]))].filter(Boolean);
             document.getElementById('filtroLugar').innerHTML = '<option value="">Pistas</option>' + lugares.map(l => `<option value="${l}">${l}</option>`).join('');
             document.getElementById('listaLugares').innerHTML = lugares.map(l => `<option value="${l}">`).join('');
 
@@ -246,66 +187,41 @@
         }
 
         function procesarStats(partidos) {
-    let stats = {};
-    Object.keys(infoJugadores).forEach(n => stats[n] = {v:0, d:0, pj:0, sg:0, st:0, jg:0, jt:0, racha:[], partidosJugados: []});
+            let stats = {};
+            Object.keys(infoJugadores).forEach(n => stats[n] = {v:0, d:0, pj:0, sg:0, st:0, jg:0, jt:0, racha:[]});
 
-    // 1. Primero recopilamos TODOS los partidos de cada jugador
-    partidos.forEach(c => {
-        const s = c.map(v => parseInt(v) || 0);
-																 
-        const sE1 = (s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0);
-        const sE2 = (s[9]>s[8]?1:0)+(s[11]>s[10]?1:0)+(s[13]>s[12]?1:0);
-        const ganoE1 = sE1 > sE2;
+            partidos.forEach(c => {
+                const s = c.map(v => parseInt(v) || 0);
+                // Lógica de sets: [8]-[9], [10]-[11], [12]-[13]
+                const sE1 = (s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0);
+                const sE2 = (s[9]>s[8]?1:0)+(s[11]>s[10]?1:0)+(s[13]>s[12]?1:0);
+                const ganoE1 = sE1 > sE2;
 
-        const registrar = (n, g, sf, sc, jf, jc) => {
-            n = n.trim(); if(!stats[n]) return;
-            // Guardamos el objeto del partido para procesarlo luego
+                const act = (n, g, sf, sc, jf, jc) => {
+                    n = n.trim(); if(!stats[n]) return;
+                    stats[n].pj++; if(g) stats[n].v++; else stats[n].d++;
+                    stats[n].sg += sf; stats[n].st += (sf+sc);
+                    stats[n].jg += jf; stats[n].jt += (jf+jc);
+                    stats[n].racha.push(g ? 'V' : 'D');
+                };
+                if(c[4]) act(c[4], ganoE1, sE1, sE2, s[8]+s[10]+s[12], s[9]+s[11]+s[13]);
+                if(c[5]) act(c[5], ganoE1, sE1, sE2, s[8]+s[10]+s[12], s[9]+s[11]+s[13]);
+                if(c[6]) act(c[6], !ganoE1, sE2, sE1, s[9]+s[11]+s[13], s[8]+s[10]+s[12]);
+                if(c[7]) act(c[7], !ganoE1, sE2, sE1, s[9]+s[11]+s[13], s[8]+s[10]+s[12]);
+            });
 
-										 
-            stats[n].partidosJugados.push({ g, sf, sc, jf, jc });
-        };
-													   
-				  
-																						 
-																						 
-																						  
-																						  
-			   
+										  
+            rankingMostrado = Object.keys(stats).filter(n => stats[n].pj > 0).map(n => ({
+                n, ...stats[n],
+                wr: (stats[n].v/stats[n].pj)*100,
+                sr: (stats[n].sg/stats[n].st)*100 || 0,
+                jr: (stats[n].jg/stats[n].jt)*100 || 0,
+                ultimos: stats[n].racha.slice(-5).reverse()
+            })).sort((a,b) => b.wr - a.wr).map((j, i) => ({ ...j, rankFijo: i + 1 }));
 
-        if(c[4]) registrar(c[4], ganoE1, sE1, sE2, s[8]+s[10]+s[12], s[9]+s[11]+s[13]);
-        if(c[5]) registrar(c[5], ganoE1, sE1, sE2, s[8]+s[10]+s[12], s[9]+s[11]+s[13]);
-        if(c[6]) registrar(c[6], !ganoE1, sE2, sE1, s[9]+s[11]+s[13], s[8]+s[10]+s[12]);
-        if(c[7]) registrar(c[7], !ganoE1, sE2, sE1, s[9]+s[11]+s[13], s[8]+s[10]+s[12]);
-    });
-													   
-														   
-																					  
-
-    // 2. Ahora procesamos solo los 5 más recientes para cada jugador
-    Object.keys(stats).forEach(n => {
-        // Tomamos solo los 5 primeros (porque 'partidos' ya viene ordenado por fecha descendente)
-        const ultimos5 = stats[n].partidosJugados.slice(0, 5);
-        
-        ultimos5.forEach(p => {
-            stats[n].pj++;
-            if(p.g) stats[n].v++; else stats[n].d++;
-            stats[n].sg += p.sf; stats[n].st += (p.sf + p.sc);
-            stats[n].jg += p.jf; stats[n].jt += (p.jf + p.jc);
-            stats[n].racha.push(p.g ? 'V' : 'D');
-        });
-    });
-
-    rankingMostrado = Object.keys(stats).filter(n => stats[n].pj > 0).map(n => ({
-        n, ...stats[n],
-        wr: (stats[n].v/stats[n].pj)*100,
-        sr: (stats[n].sg/stats[n].st)*100 || 0,
-        jr: (stats[n].jg/stats[n].jt)*100 || 0,
-        ultimos: stats[n].racha // Ya están en orden de más nuevo a más viejo
-    })).sort((a,b) => b.wr - a.wr).map((j, i) => ({ ...j, rankFijo: i + 1 }));
-
-    renderizarRanking();
-    renderizarHistorial(partidos);
-}
+            renderizarRanking();
+            renderizarHistorial(partidos);
+        }
 
         function renderizarRanking() {
             document.querySelectorAll('th span').forEach(s => s.innerText = '');
@@ -320,21 +236,19 @@
 
             document.getElementById('tabla-body').innerHTML = sorted.map(j => `
                 <tr class="hover:bg-slate-50">
-															<td class="p-4 font-bold text-slate-400">#${j.rankFijo}</td>
-															<td class="p-4 flex items-center gap-3 cursor-pointer" onclick="verJugador('${j.n}')">
-																<img src="${infoJugadores[j.n] || 'https://via.placeholder.com/100'}" class="avatar">
-																	<span class="font-bold text-indigo-600">${j.n}</span>
-																</td>
-																<td class="p-4 text-center">${j.pj}</td>
-																<td class="p-4 text-center font-bold text-indigo-600">${j.wr.toFixed(1)}%</td>
-																<td class="p-4 text-center text-emerald-600 font-bold">${j.v}</td>
-																<td class="p-4 text-center text-red-400 font-bold">${j.d}</td>
-																<td class="p-4 text-center">
-																	<div class="flex justify-center gap-1">${j.ultimos.map(r => `<span class="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white ${r==='V'?'bg-emerald-500':'bg-red-500'}">${r}</span>`).join('')}</div>
-																</td>
-																<td class="p-4 text-center">${j.sr.toFixed(0)}%</td>
-																<td class="p-4 text-center">${j.jr.toFixed(0)}%</td>
-															</tr>`).join('');
+                    <td class="p-4 font-bold text-slate-400">#${j.rankFijo}</td>
+                    <td class="p-4 flex items-center gap-3 cursor-pointer" onclick="verJugador('${j.n}')">
+                        <img src="${infoJugadores[j.n] || 'https://via.placeholder.com/100'}" class="avatar">
+                        <span class="font-bold text-indigo-600">${j.n}</span>
+                    </td>
+                    <td class="p-4 text-center">${j.pj}</td>
+                    <td class="p-4 text-center font-bold text-indigo-600">${j.wr.toFixed(1)}%</td>
+                    <td class="p-4 text-center text-emerald-600 font-bold">${j.v}</td>
+                    <td class="p-4 text-center text-red-400 font-bold">${j.d}</td>
+                    <td class="p-4 text-center"><div class="flex justify-center gap-1">${j.ultimos.map(r => `<span class="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white ${r==='V'?'bg-emerald-500':'bg-red-500'}">${r}</span>`).join('')}</div></td>
+                    <td class="p-4 text-center">${j.sr.toFixed(0)}%</td>
+                    <td class="p-4 text-center">${j.jr.toFixed(0)}%</td>
+                </tr>`).join('');
         }
 
         function ordenarTabla(campo) {
@@ -351,18 +265,15 @@
                 const ganoE1 = sE1 > sE2;
                 return `
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3">
-																<div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
-																	<span>${c[1]}</span>
-																	<span>${c[3]}</span>
-																</div>
-																<div class="flex items-center justify-between gap-2">
-																	<div class="text-[11px] w-1/3 leading-tight ${ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[4]} / ${c[5]}</div>
-																	<div class="bg-indigo-50 text-indigo-600 px-2 py-1 rounded-lg font-mono text-[10px] font-bold">
+                    <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase"><span>${c[1]}</span> <span>${c[3]}</span></div>
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="text-[11px] w-1/3 leading-tight ${ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[4]} / ${c[5]}</div>
+                        <div class="bg-indigo-50 text-indigo-600 px-2 py-1 rounded-lg font-mono text-[10px] font-bold">
                             ${s[8]}-${s[9]} | ${s[10]}-${s[11]}${ (s[12]>0 || s[13]>0) ? ` | ${s[12]}-${s[13]}` : ''}
                         </div>
-																	<div class="text-[11px] w-1/3 text-right leading-tight ${!ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[6]} / ${c[7]}</div>
-																</div>
-															</div>`;
+                        <div class="text-[11px] w-1/3 text-right leading-tight ${!ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[6]} / ${c[7]}</div>
+                    </div>
+                </div>`;
             }).join('');
         }
 
@@ -416,11 +327,7 @@
             } catch (err) {
                 alert("Error al guardar");
                 btn.disabled = false; btn.innerText = "Guardar Resultado";
-							  
-					   
             }
-
-															
         };
 
         function verJugador(n) { document.getElementById('filtroJugador').value = n; aplicarFiltros(); cambiarTab('historial'); }
@@ -433,5 +340,5 @@
 
         init();
     </script>
-													</body>
-												</html>
+</body>
+</html>
