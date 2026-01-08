@@ -1,252 +1,144 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-	<meta charset="UTF-8">
-		<meta name="viewport"
-		      content="width=device-width, initial-scale=1.0">
-			<script src="https://cdn.tailwindcss.com"/>
-			<script src="https://cdn.jsdelivr.net/npm/chart.js"/>
-			<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
-			      rel="stylesheet">
-				<title>PadelTour Oficial</title>
-				<style>
-	
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>PadelTour Oficial</title>
+    <style>
         body { font-family: 'Inter', sans-serif; }
-		.tab-active { color: #34D399; border-bottom: 2px solid #34D399; }
+        .tab-active { color: #34D399; border-bottom: 2px solid #34D399; }
         input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
         .avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: #e2e8f0; }
         .input-set { width: 1.8rem; height: 2.2rem; background: white; border-radius: 0.25rem; text-align: center; font-weight: bold; font-size: 0.9rem; border: 1px solid #cbd5e1; }
         th { cursor: pointer; transition: 0.2s; white-space: nowrap; }
-		.filtro-activo { 
-        color: #0f172a !important; 
-        font-weight: 800 !important; 
-        border-color: #0f172a !important; 
-        background-color: #f1f5f9 !important;
-    }.filtro-inactivo { color: #94a3b8; }
-    canvas { width: 100% !important; height: 300px !important; }
+        .filtro-activo { color: #0f172a !important; font-weight: 800 !important; border-color: #0f172a !important; background-color: #f1f5f9 !important; }
+        .filtro-inactivo { color: #94a3b8; }
+        canvas { width: 100% !important; height: 300px !important; }
     </style>
-			</head>
-			<body class="bg-slate-50 text-slate-900 pb-20">
-				<header class="bg-[#0F172A] border-b border-slate-800 sticky top-0 z-50">
-					<div class="max-w-5xl mx-auto px-4 pt-4">
-						<div class="flex justify-between items-center mb-4">
-							<h1 class="text-4xl font-black italic text-emerald-400 tracking-tighter uppercase cursor-pointer"
-							    onclick="location.reload()">Padel Tour</h1>
-							<button onclick="abrirModal()"
-							        class="bg-[#5a6371] text-white px-4 py-2 rounded-xl text-s font-bold">+ RESULTADO</button>
-						</div>
-						<nav class="flex gap-6">
-							<button onclick="cambiarTab('clasificacion')"
-							        id="btn-tab-clas"
-							        class="pb-3 text-sm font-bold text-[#a9b5c6] tab-active">Clasificación</button>
-							<button onclick="cambiarTab('historial')"
-							        id="btn-tab-hist"
-							        class="pb-3 text-sm font-bold text-[#a9b5c6]">Partidos</button>
-							<button onclick="cambiarTab('stats')"
-							        id="btn-tab-stats"
-							        class="pb-3 text-sm font-bold text-[#a9b5c6]">Gráficas</button>
-						</nav>
-					</div>
-				</header>
-				<section class="max-w-5xl mx-auto px-4 py-4 flex gap-2 overflow-x-auto">
-					<select id="filtroAnio"
-					        onchange="aplicarFiltros()"
-					        class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"/>
-					<select id="filtroLugar"
-					        onchange="aplicarFiltros()"
-					        class="bg-white border p-2 rounded-lg text-xs font-medium outline-none">
-						<option value="">Pistas</option>
-					</select>
-					<select id="filtroJugador"
-					        onchange="aplicarFiltros()"
-					        class="bg-white border p-2 rounded-lg text-xs font-medium outline-none">
-						<option value="">Jugadores</option>
-					</select>
-					<select id="filtroPareja"
-					        onchange="aplicarFiltros()"
-					        class="bg-white border p-2 rounded-lg text-xs font-medium outline-none">
-						<option value="">Parejas</option>
-					</select>
-				</section>
-				<main class="max-w-7xl mx-auto px-4">
-					<div id="view-clasificacion"
-					     class="block overflow-x-auto">
-						<div class="bg-slate-50 rounded-2xl shadow-sm border border-slate-100 min-w-[750px]">
-							<table class="w-full text-left text-xs">
-								<thead class="bg-slate-50 text-slate-500 font-bold uppercase">
-									<tr>
-										<th class="p-4 w-10">#</th>
-										<th class="p-4"
-										    onclick="ordenarTabla('n')">Jugador <span id="sort-n"/>
-										</th>
-										<th class="p-4 text-center"
-										    onclick="ordenarTabla('pj')">PJ <span id="sort-pj"/>
-										</th>
-										<th class="p-4 text-center text-indigo-600"
-										    onclick="ordenarTabla('wr')">%V <span id="sort-wr"/>
-										</th>
-										<th class="p-4 text-center text-[#10B981]"
-										    onclick="ordenarTabla('v')">G <span id="sort-v"/>
-										</th>
-										<th class="p-4 text-center text-red-400"
-										    onclick="ordenarTabla('d')">P <span id="sort-d"/>
-										</th>
-										<th class="p-4 text-center">Racha→</th>
-										<th class="p-4 text-center"
-										    onclick="ordenarTabla('sr')">%S <span id="sort-sr"/>
-										</th>
-										<th class="p-4 text-center"
-										    onclick="ordenarTabla('jr')">%J <span id="sort-jr"/>
-										</th>
-									</tr>
-								</thead>
-								<tbody id="tabla-body"
-								       class="divide-y divide-slate-50"/>
-							</table>
-						</div>
-					</div>
-					<div id="view-historial"
-					     class="hidden">
-						<div id="historial-cards"
-						     class="grid gap-3 md:grid-cols-1"/>
-					</div>
-					<div id="view-stats"
-					     class="hidden space-y-6">
-						<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4">
-							<div class="flex flex-wrap gap-4 items-end">
-								<div class="flex flex-col gap-1">
-									<label class="text-[10px] font-bold text-slate-400 uppercase">Rango de Fechas</label>
-									<div class="flex gap-2 items-center">
-										<input type="date"
-										       id="fechaInicio"
-										       onchange="aplicarFiltros()"
-										       class="border rounded p-1 text-xs">
-											<input type="date"
-											       id="fechaFin"
-											       onchange="aplicarFiltros()"
-											       class="border rounded p-1 text-xs">
-												<button onclick="resetFechas()"
-												        class="bg-slate-100 text-slate-500 px-2 py-1 rounded text-[10px] font-bold hover:bg-slate-200">RESET</button>
-											</div>
-										</div>
-									</div>
-									<div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-3">
-										<div class="flex flex-col gap-1">
-											<label class="text-[10px] font-bold text-slate-400 uppercase">Seleccionar Jugadores</label>
-											<select id="select-jugadores-multi"
-											        multiple
-											        onchange="aplicarFiltros()"
-											        class="border rounded-lg p-2 text-xs h-24 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none"/>
-										</div>
-										<div class="flex flex-col gap-1">
-											<label class="text-[10px] font-bold text-slate-400 uppercase">Seleccionar Parejas</label>
-											<select id="select-parejas-multi"
-											        multiple
-											        onchange="aplicarFiltros()"
-											        class="border rounded-lg p-2 text-xs h-24 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none"/>
-										</div>
-									</div>
-								</div>
-								<div class="grid gap-6">
-									<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-										<h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">Evolución de Resultados</h3>
-										<div class="relative h-[300px] w-full">
-											<canvas id="chartResultados"/>
-										</div>
-									</div>
-									<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-										<h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">Evolución % Victorias</h3>
-										<div class="relative h-[300px] w-full">
-											<canvas id="chartWR"/>
-										</div>
-									</div>
-								</div>
-							</div>
-						</main>
-						<div id="modal"
-						     class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[100] backdrop-blur-sm">
-							<div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl relative">
-								<h2 class="text-xl font-800 mb-6 text-center italic">Nuevo Partido</h2>
-								<form id="formPartido"
-								      class="space-y-4">
-									<div class="grid grid-cols-2 gap-2">
-										<input type="password"
-										       id="pass"
-										       placeholder="PIN"
-										       class="p-3 bg-slate-100 rounded-xl border-0 text-sm text-center font-bold"
-										       required>
-										<input
-										       type="date"
-										       id="fechaForm"
-										       class="p-3 bg-slate-100 rounded-xl border-0 text-xs text-center font-bold"
-										       required>
-									</div>
-									<div
-									     class="grid grid-cols-2 gap-4">
-										<div class="space-y-2 bg-indigo-50 p-3 rounded-2xl">
-											<select id="j1"
-											        class="w-full p-2 bg-white rounded-lg text-xs border select-jugador"
-											        required
-											        onchange="validarJugadores()"/>
-											<select id="j2"
-											        class="w-full p-2 bg-white rounded-lg text-xs border select-jugador"
-											        required
-											        onchange="validarJugadores()"/>
-										</div>
-										<div class="space-y-2 bg-slate-50 p-3 rounded-2xl">
-											<select id="j3"
-											        class="w-full p-2 bg-white rounded-lg text-xs border select-jugador"
-											        required
-											        onchange="validarJugadores()"/>
-											<select id="j4"
-											        class="w-full p-2 bg-white rounded-lg text-xs border select-jugador"
-											        required
-											        onchange="validarJugadores()"/>
-										</div>
-									</div>
-									<div class="bg-indigo-900 p-4 rounded-2xl flex justify-center gap-2">
-										<div class="flex gap-1">
-											<input type="number"
-											       id="s1e1"
-											       class="input-set"
-											       oninput="autoTab(this,'s1e2')">
-												<input type="number"
-												       id="s1e2"
-												       class="input-set"
-												       oninput="autoTab(this,'s2e1')"/>
-												<div class="flex gap-1">
-													<input type="number"
-													       id="s2e1"
-													       class="input-set"
-													       oninput="autoTab(this,'s2e2')">
-														<input type="number"
-														       id="s2e2"
-														       class="input-set"
-														       oninput="autoTab(this,'s3e1')"/>
-														<div class="flex gap-1">
-															<input type="number"
-															       id="s3e1"
-															       class="input-set"
-															       oninput="autoTab(this,'s3e2')">
-																<input type="number"
-																       id="s3e2"
-																       class="input-set"/>
-															</div>
-															<input list="listaLugares"
-															       id="lugarForm"
-															       placeholder="Pista"
-															       class="w-full p-3 bg-slate-100 rounded-xl text-sm"
-															       required>
-															<datalist
-															          id="listaLugares"/>
-															<button id="btnSubmit"
-															        type="submit"
-															        class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-lg">Guardar Resultado</button>
-															<button type="button"
-															        onclick="cerrarModal()"
-															        class="w-full text-slate-400 text-xs font-bold uppercase py-2">Cancelar</button>
-														</form>
-													</div>
+</head>
+<body class="bg-slate-50 text-slate-900 pb-20">
+
+    <header class="bg-[#0F172A] border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 pt-4">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-4xl font-black italic text-emerald-400 tracking-tighter uppercase cursor-pointer" onclick="location.reload()">Padel Tour</h1>
+                <button onclick="abrirModal()" class="bg-[#5a6371] text-white px-4 py-2 rounded-xl text-s font-bold">+ RESULTADO</button>
+            </div>
+            <nav class="flex gap-6">
+                <button onclick="cambiarTab('clasificacion')" id="btn-tab-clas" class="pb-3 text-sm font-bold text-[#a9b5c6] tab-active">Clasificación</button>
+                <button onclick="cambiarTab('historial')" id="btn-tab-hist" class="pb-3 text-sm font-bold text-[#a9b5c6]">Partidos</button>
+                <button onclick="cambiarTab('stats')" id="btn-tab-stats" class="pb-3 text-sm font-bold text-[#a9b5c6]">Gráficas</button>
+            </nav>
+        </div>
+    </header>
+
+    <section class="max-w-5xl mx-auto px-4 py-4 flex gap-2 overflow-x-auto">
+        <select id="filtroAnio" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"></select>
+        <select id="filtroLugar" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"><option value="">Pistas</option></select>
+        <select id="filtroJugador" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"><option value="">Jugadores</option></select>
+        <select id="filtroPareja" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"><option value="">Parejas</option></select>
+    </section>
+
+    <main class="max-w-7xl mx-auto px-4">
+        <div id="view-clasificacion" class="block overflow-x-auto">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 min-w-[750px]">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase">
+                        <tr>
+                            <th class="p-4 w-10">#</th>
+                            <th class="p-4" onclick="ordenarTabla('n')">Jugador <span id="sort-n"></span></th>
+                            <th class="p-4 text-center" onclick="ordenarTabla('pj')">PJ <span id="sort-pj"></span></th>
+                            <th class="p-4 text-center text-indigo-600" onclick="ordenarTabla('wr')">%V <span id="sort-wr"></span></th>
+                            <th class="p-4 text-center text-[#10B981]" onclick="ordenarTabla('v')">G <span id="sort-v"></span></th>
+                            <th class="p-4 text-center text-red-400" onclick="ordenarTabla('d')">P <span id="sort-d"></span></th>
+                            <th class="p-4 text-center">Racha→</th>
+                            <th class="p-4 text-center" onclick="ordenarTabla('sr')">%S <span id="sort-sr"></span></th>
+                            <th class="p-4 text-center" onclick="ordenarTabla('jr')">%J <span id="sort-jr"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-body" class="divide-y divide-slate-50"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-historial" class="hidden">
+            <div id="historial-cards" class="grid gap-3 md:grid-cols-1"></div>
+        </div>
+
+        <div id="view-stats" class="hidden space-y-6">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4">
+                <div class="flex flex-wrap gap-4 items-end">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Rango de Fechas</label>
+                        <div class="flex gap-2 items-center">
+                            <input type="date" id="fechaInicio" onchange="aplicarFiltros()" class="border rounded p-1 text-xs">
+                            <input type="date" id="fechaFin" onchange="aplicarFiltros()" class="border rounded p-1 text-xs">
+                            <button onclick="resetFechas()" class="bg-slate-100 text-slate-500 px-2 py-1 rounded text-[10px] font-bold hover:bg-slate-200 uppercase">Reset</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-3">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Jugadores (Multiselección)</label>
+                        <select id="select-jugadores-multi" multiple onchange="aplicarFiltros()" class="border rounded-lg p-2 text-xs h-24 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Parejas (Multiselección)</label>
+                        <select id="select-parejas-multi" multiple onchange="aplicarFiltros()" class="border rounded-lg p-2 text-xs h-24 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+                    </div>
+                </div>
+                <p class="text-[9px] text-slate-400 italic">Mantén Ctrl (PC) o toca varios (Móvil) para comparar.</p>
+            </div>
+            <div class="grid gap-6">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">Evolución de Resultados</h3>
+                    <div class="relative h-[300px] w-full"><canvas id="chartResultados"></canvas></div>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">Evolución % Victorias</h3>
+                    <div class="relative h-[300px] w-full"><canvas id="chartWR"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[100] backdrop-blur-sm">
+        <div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl relative">
+            <h2 class="text-xl font-black mb-6 text-center italic uppercase">Nuevo Partido</h2>
+            <form id="formPartido" class="space-y-4">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="password" id="pass" placeholder="PIN" class="p-3 bg-slate-100 rounded-xl border-0 text-sm text-center font-bold" required>
+                    <input type="date" id="fechaForm" class="p-3 bg-slate-100 rounded-xl border-0 text-xs text-center font-bold" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2 bg-indigo-50 p-3 rounded-2xl">
+                        <select id="j1" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
+                        <select id="j2" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
+                    </div>
+                    <div class="space-y-2 bg-slate-50 p-3 rounded-2xl">
+                        <select id="j3" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
+                        <select id="j4" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
+                    </div>
+                </div>
+                <div class="bg-indigo-900 p-4 rounded-2xl flex flex-wrap justify-center gap-2">
+                    <input type="number" id="s1e1" class="input-set" oninput="autoTab(this,'s1e2')">
+                    <input type="number" id="s1e2" class="input-set" oninput="autoTab(this,'s2e1')">
+                    <input type="number" id="s2e1" class="input-set" oninput="autoTab(this,'s2e2')">
+                    <input type="number" id="s2e2" class="input-set" oninput="autoTab(this,'s3e1')">
+                    <input type="number" id="s3e1" class="input-set" oninput="autoTab(this,'s3e2')">
+                    <input type="number" id="s3e2" class="input-set">
+                </div>
+                <input list="listaLugares" id="lugarForm" placeholder="Pista" class="w-full p-3 bg-slate-100 rounded-xl text-sm" required>
+                <datalist id="listaLugares"></datalist>
+                <button id="btnSubmit" type="submit" class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-lg">Guardar Resultado</button>
+                <button type="button" onclick="cerrarModal()" class="w-full text-slate-400 text-xs font-bold uppercase py-2">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         const URL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=0&single=true&output=csv';
         const URL_JUGADORES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=1804776142&single=true&output=csv';
@@ -257,6 +149,7 @@
         let infoJugadores = {};
         let rankingMostrado = [];
         let ordenConfig = { campo: 'wr', sentido: -1 };
+        let chart1, chart2;
 
         function autoTab(c, n) { if(c.value.length >= 1) { const el = document.getElementById(n); if(el) el.focus(); } }
 
@@ -274,9 +167,7 @@
             try {
                 await cargarJugadores();
                 await cargarPartidos();
-            } catch (err) {
-                console.error("Error en init:", err);
-            }
+            } catch (err) { console.error("Error en init:", err); }
         }
 
         async function cargarJugadores() {
@@ -297,16 +188,14 @@
         async function cargarPartidos() {
             const res = await fetch(URL_CSV);
             const texto = await res.text();
-																										
-            
-            // Limpieza de datos y mapeo
             datosPartidos = texto.split('\n').slice(1).map(f => f.split(',')).filter(f => f.length > 7 && f[4]);
-            
             datosPartidos.sort((a, b) => parsearFecha(b[1]) - parsearFecha(a[1]));
 
             const anioActual = new Date().getFullYear().toString();
             const anios = [...new Set(datosPartidos.map(f => f[2]))].filter(Boolean).sort((a,b) => b-a);
-            document.getElementById('filtroAnio').innerHTML = '<option value="">Años</option>' + anios.map(a => `<option value="${a}" ${a===anioActual ?'selected' :'' }>${a}< option>`).join(''); const lugares=[...new Set(datosPartidos.map(f=> f[3]))].filter(Boolean);
+            document.getElementById('filtroAnio').innerHTML = '<option value="">Años</option>' + anios.map(a => `<option value="${a}" ${a===anioActual ?'selected' :'' }>${a}</option>`).join(''); 
+            
+            const lugares = [...new Set(datosPartidos.map(f=> f[3]))].filter(Boolean);
             document.getElementById('filtroLugar').innerHTML = '<option value="">Pistas</option>' + lugares.map(l => `<option value="${l}">${l}</option>`).join('');
             document.getElementById('listaLugares').innerHTML = lugares.map(l => `<option value="${l}">`).join('');
 
@@ -316,77 +205,55 @@
                 if(p[6] && p[7]) parejasSet.add([p[6].trim(), p[7].trim()].sort().join(' / '));
             });
             document.getElementById('filtroPareja').innerHTML = '<option value="">Parejas</option>' + [...parejasSet].sort().map(p => `<option value="${p}">${p}</option>`).join('');
-			generarCheckboxes();
+            
+            generarMultiSelects();
             aplicarFiltros();
         }
-		
-		function generarCheckboxes() {
-			const selJug = document.getElementById('select-jugadores-multi');
-			const selPar = document.getElementById('select-parejas-multi');
-			if(!selJug || !selPar) return;
-		
-			// Limpiar selects antes de llenar
-			selJug.innerHTML = '';
-			selPar.innerHTML = '';
-		
-			const jugadores = Object.keys(infoJugadores).sort();
-			const parejasSet = new Set();
-			
-			datosPartidos.forEach(p => {
-				if(p[4] && p[5]) parejasSet.add([p[4].trim(), p[5].trim()].sort().join(' / '));
-				if(p[6] && p[7]) parejasSet.add([p[6].trim(), p[7].trim()].sort().join(' / '));
-			});
-		
-			jugadores.forEach(j => {
-				const opt = document.createElement('option');
-				opt.value = j;
-				opt.text = j;
-				selJug.appendChild(opt);
-			});
-		
-			[...parejasSet].sort().forEach(p => {
-				const opt = document.createElement('option');
-				opt.value = p;
-				opt.text = p;
-				selPar.appendChild(opt);
-			});
-		}
+
+        function generarMultiSelects() {
+            const selJug = document.getElementById('select-jugadores-multi');
+            const selPar = document.getElementById('select-parejas-multi');
+            if(!selJug || !selPar) return;
+
+            selJug.innerHTML = ''; selPar.innerHTML = '';
+            const jugadores = Object.keys(infoJugadores).sort();
+            const parejasSet = new Set();
+            datosPartidos.forEach(p => {
+                if(p[4] && p[5]) parejasSet.add([p[4].trim(), p[5].trim()].sort().join(' / '));
+                if(p[6] && p[7]) parejasSet.add([p[6].trim(), p[7].trim()].sort().join(' / '));
+            });
+
+            jugadores.forEach(j => selJug.innerHTML += `<option value="${j}">${j}</option>`);
+            [...parejasSet].sort().forEach(p => selPar.innerHTML += `<option value="${p}">${p}</option>`);
+        }
+
         function aplicarFiltros() {
-			const ids = ['filtroAnio', 'filtroLugar', 'filtroJugador', 'filtroPareja'];
-			ids.forEach(id => {
-				const el = document.getElementById(id);
-				if (el.value !== "") {
-					el.classList.add('filtro-activo');
-					el.classList.remove('text-slate-900');
-				} else {
-					el.classList.remove('filtro-activo');
-					el.classList.add('text-slate-400');
-				}
-			});
-			
-			const fAnio = document.getElementById('filtroAnio').value;
-			const fLugar = document.getElementById('filtroLugar').value;
-			const fJug = document.getElementById('filtroJugador').value;
-			const fPar = document.getElementById('filtroPareja').value;
-			const fIni = document.getElementById('fechaInicio').value ? new Date(document.getElementById('fechaInicio').value).getTime() : 0;
-			const fFin = document.getElementById('fechaFin').value ? new Date(document.getElementById('fechaFin').value).getTime() : Infinity;
-			
-			const filtrados = datosPartidos.filter(f => {
-				const p1 = [f[4].trim(), f[5].trim()].sort().join(' / ');
-				const p2 = [f[6].trim(), f[7].trim()].sort().join(' / ');
-				const fechaPart = parsearFecha(f[1]);
-				
-				return (!fAnio || f[2] === fAnio) && 
-						(!fLugar || f[3] === fLugar) && 
-						(!fJug || [f[4],f[5],f[6],f[7]].map(n => n.trim()).includes(fJug)) &&
-						(!fPar || (p1 === fPar || p2 === fPar)) &&
-						(fechaPart >= fIni && fechaPart <= fFin); }); procesarStats(filtrados); actualizarGraficos(filtrados); Nueva función } function procesarStats(partidos) { let stats={}; Object.keys(infoJugadores).forEach(n=> stats[n] = {v:0, d:0, pj:0, sg:0, st:0, jg:0, jt:0, racha:[]});
-						   
-																												   
+            const fAnio = document.getElementById('filtroAnio').value;
+            const fLugar = document.getElementById('filtroLugar').value;
+            const fJug = document.getElementById('filtroJugador').value;
+            const fPar = document.getElementById('filtroPareja').value;
+            const fIni = document.getElementById('fechaInicio').value ? new Date(document.getElementById('fechaInicio').value).getTime() : 0;
+            const fFin = document.getElementById('fechaFin').value ? new Date(document.getElementById('fechaFin').value).getTime() : Infinity;
+            
+            const filtrados = datosPartidos.filter(f => {
+                const p1 = [f[4].trim(), f[5].trim()].sort().join(' / ');
+                const p2 = [f[6].trim(), f[7].trim()].sort().join(' / ');
+                const fechaPart = parsearFecha(f[1]);
+                return (!fAnio || f[2] === fAnio) && (!fLugar || f[3] === fLugar) && 
+                       (!fJug || [f[4],f[5],f[6],f[7]].map(n => n.trim()).includes(fJug)) &&
+                       (!fPar || (p1 === fPar || p2 === fPar)) && (fechaPart >= fIni && fechaPart <= fFin);
+            });
+
+            procesarStats(filtrados);
+            actualizarGraficos(filtrados);
+        }
+
+        function procesarStats(partidos) {
+            let stats={}; 
+            Object.keys(infoJugadores).forEach(n=> stats[n] = {v:0, d:0, pj:0, sg:0, st:0, jg:0, jt:0, racha:[]});
 
             partidos.forEach(c => {
                 const s = c.map(v => parseInt(v) || 0);
-																 
                 const sE1 = (s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0);
                 const sE2 = (s[9]>s[8]?1:0)+(s[11]>s[10]?1:0)+(s[13]>s[12]?1:0);
                 const ganoE1 = sE1 > sE2;
@@ -404,7 +271,6 @@
                 if(c[7]) act(c[7], !ganoE1, sE2, sE1, s[9]+s[11]+s[13], s[8]+s[10]+s[12]);
             });
 
-			
             rankingMostrado = Object.keys(stats).filter(n => stats[n].pj > 0).map(n => ({
                 n, ...stats[n],
                 wr: (stats[n].v/stats[n].pj)*100,
@@ -418,39 +284,23 @@
         }
 
         function renderizarRanking() {
-            document.querySelectorAll('th span').forEach(s => s.innerText = '');
-            const span = document.getElementById(`sort-${ordenConfig.campo}`);
-            if(span) span.innerText = ordenConfig.sentido === 1 ? ' ▲' : ' ▼';
-
-            const sorted = [...rankingMostrado].sort((a,b) => {
-                let vA = a[ordenConfig.campo], vB = b[ordenConfig.campo];
-                if (typeof vA === 'string') return vA.localeCompare(vB) * ordenConfig.sentido;
-                return (vA - vB) * ordenConfig.sentido;
-            });
-
-            document.getElementById('tabla-body').innerHTML = sorted.map(j => `
+            document.getElementById('tabla-body').innerHTML = rankingMostrado.map(j => `
                 <tr class="hover:bg-slate-50">
-																		<td class="p-4 font-bold text-slate-400">#${j.rankFijo}</td>
-																		<td class="p-4 flex items-center gap-3 cursor-pointer" onclick="verJugador('${j.n}')">
-																			<img src="${infoJugadores[j.n] || 'https://via.placeholder.com/100'}" class="avatar">
-																				<span class="font-bold text-indigo-600">${j.n}</span>
-																			</td>
-																			<td class="p-4 text-center font-bold text-slate-500">${j.pj}</td>
-																			<td class="p-4 text-center font-bold text-indigo-600">${j.wr.toFixed(1)}%</td>
-																			<td class="p-4 text-center text-[#10B981] font-bold">${j.v}</td>
-																			<td class="p-4 text-center text-red-500 font-bold">${j.d}</td>
-																			<td class="p-4 text-center">
-																				<div class="flex justify-center gap-1">${j.ultimos.map(r => `<span class="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white ${r==='V'?'bg-emerald-500':'bg-red-500'}">${r}</span>`).join('')}</div>
-																			</td>
-																			<td class="p-4 text-center">${j.sr.toFixed(0)}%</td>
-																			<td class="p-4 text-center">${j.jr.toFixed(0)}%</td>
-																		</tr>`).join('');
-        }
-
-        function ordenarTabla(campo) {
-            if (ordenConfig.campo === campo) ordenConfig.sentido *= -1;
-            else { ordenConfig.campo = campo; ordenConfig.sentido = -1; }
-            renderizarRanking();
+                    <td class="p-4 font-bold text-slate-400">#${j.rankFijo}</td>
+                    <td class="p-4 flex items-center gap-3 cursor-pointer" onclick="verJugador('${j.n}')">
+                        <img src="${infoJugadores[j.n] || 'https://via.placeholder.com/100'}" class="avatar">
+                        <span class="font-bold text-indigo-600">${j.n}</span>
+                    </td>
+                    <td class="p-4 text-center font-bold text-slate-500">${j.pj}</td>
+                    <td class="p-4 text-center font-bold text-indigo-600">${j.wr.toFixed(1)}%</td>
+                    <td class="p-4 text-center text-[#10B981] font-bold">${j.v}</td>
+                    <td class="p-4 text-center text-red-500 font-bold">${j.d}</td>
+                    <td class="p-4 text-center">
+                        <div class="flex justify-center gap-1">${j.ultimos.map(r => `<span class="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white ${r==='V'?'bg-emerald-500':'bg-red-500'}">${r}</span>`).join('')}</div>
+                    </td>
+                    <td class="p-4 text-center">${j.sr.toFixed(0)}%</td>
+                    <td class="p-4 text-center">${j.jr.toFixed(0)}%</td>
+                </tr>`).join('');
         }
 
         function renderizarHistorial(partidos) {
@@ -461,253 +311,147 @@
                 const ganoE1 = sE1 > sE2;
                 return `
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3">
-																			<div class="flex justify-between text-[13px] font-bold text-slate-400 uppercase">
-																				<span>${c[1]}</span>
-																				<span>${c[3]}</span>
-																			</div>
-																			<div class="flex items-center justify-between gap-2">
-																				<div class="text-[15px] w-1/3 leading-tight ${ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[4]} / ${c[5]}</div>
-																				<div class="bg-indigo-50 text-indigo-600 px-2 py-1 rounded-lg font-mono text-[18px] font-bold">
+                    <div class="flex justify-between text-[11px] font-bold text-slate-400 uppercase">
+                        <span>${c[1]}</span><span>${c[3]}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="text-[14px] w-1/3 leading-tight ${ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[4]} / ${c[5]}</div>
+                        <div class="bg-white/50 backdrop-blur-sm text-indigo-700 px-3 py-1.5 rounded-xl border border-indigo-100 shadow-sm font-mono text-[16px] font-bold tracking-tight">
                             ${s[8]}-${s[9]} | ${s[10]}-${s[11]}${ (s[12]>0 || s[13]>0) ? ` | ${s[12]}-${s[13]}` : ''}
                         </div>
-																				<div class="text-[15px] w-1/3 text-right leading-tight ${!ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[6]} / ${c[7]}</div>
-																			</div>
-																		</div>`;
+                        <div class="text-[14px] w-1/3 text-right leading-tight ${!ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[6]} / ${c[7]}</div>
+                    </div>
+                </div>`;
             }).join('');
         }
 
-        function validarJugadores() {
-            const js = [document.getElementById('j1').value, document.getElementById('j2').value, 
-                        document.getElementById('j3').value, document.getElementById('j4').value].filter(v => v !== "");
-            const btn = document.getElementById('btnSubmit');
-            const esRepetido = new Set(js).size !== js.length && js.length > 1;
-            btn.disabled = esRepetido;
-            btn.style.background = esRepetido ? "#ef4444" : "#4f46e5";
-            btn.innerText = esRepetido ? "JUGADORES REPETIDOS" : "GUARDAR RESULTADO";
-            return !esRepetido;
-        }
+        function actualizarGraficos(partidos) {
+            const canvas1 = document.getElementById('chartResultados');
+            const canvas2 = document.getElementById('chartWR');
+            if(!canvas1 || !canvas2) return;
 
-        function abrirModal() {
-            document.getElementById('formPartido').reset();
-            document.getElementById('fechaForm').value = new Date().toISOString().split('T')[0];
-            document.getElementById('modal').style.display = 'flex';
-        }
+            const selJug = Array.from(document.getElementById('select-jugadores-multi').selectedOptions).map(o => o.value);
+            const selPar = Array.from(document.getElementById('select-parejas-multi').selectedOptions).map(o => o.value);
+            let seleccionados = [...selJug, ...selPar];
+            const fJugador = document.getElementById('filtroJugador').value;
+            if (seleccionados.length === 0 && fJugador) seleccionados = [fJugador];
 
-		function resetFechas() {
-			document.getElementById('fechaInicio').value = '';
-			document.getElementById('fechaFin').value = '';
-			aplicarFiltros();
-		}
-        function cerrarModal() { document.getElementById('modal').style.display = 'none'; }
+            if (seleccionados.length === 0) {
+                if(chart1) chart1.destroy(); if(chart2) chart2.destroy();
+                return;
+            }
 
-        document.getElementById('formPartido').onsubmit = async (e) => {
-            e.preventDefault();
-            const pin = document.getElementById('pass').value;
-            if(pin !== PIN_CORRECTO) return alert("PIN Incorrecto");
-            if(!validarJugadores()) return;
+            const partidosCron = [...partidos].reverse();
+            const relevantes = partidosCron.filter(p => {
+                const eq1 = [p[4].trim(), p[5].trim()].sort().join(' / ');
+                const eq2 = [p[6].trim(), p[7].trim()].sort().join(' / ');
+                const noms = [p[4].trim(), p[5].trim(), p[6].trim(), p[7].trim()];
+                return seleccionados.some(s => s === eq1 || s === eq2 || noms.includes(s));
+            });
 
-            const btn = document.getElementById('btnSubmit');
-            btn.disabled = true; btn.innerText = "ENVIANDO...";
+            if (relevantes.length === 0) return;
 
-            const fechaRaw = document.getElementById('fechaForm').value; 
-            const parts = fechaRaw.split('-');
-            const fechaBonita = `${parts[2]}/${parts[1]}/${parts[0]}`;
+            const labels = relevantes.map(p => {
+                const d = new Date(parsearFecha(p[1]));
+                return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getFullYear()).slice(-2)}`;
+            });
 
-            const datos = {
-							  
-                fecha: fechaBonita,
-                temporada: parts[0],
-                lugar: document.getElementById('lugarForm').value,
-                j1: document.getElementById('j1').value, j2: document.getElementById('j2').value,
-                j3: document.getElementById('j3').value, j4: document.getElementById('j4').value,
-                s1e1: document.getElementById('s1e1').value||0, s1e2: document.getElementById('s1e2').value||0,
-                s2e1: document.getElementById('s2e1').value||0, s2e2: document.getElementById('s2e2').value||0,
-                s3e1: document.getElementById('s3e1').value||0, s3e2: document.getElementById('s3e2').value||0
+            const datasetsRes = []; const datasetsWR = [];
+            const colores = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+
+            seleccionados.forEach((sujeto, idx) => {
+                const col = colores[idx % colores.length];
+                let vAcc = 0, pAcc = 0;
+                const resData = [], wrData = [];
+
+                relevantes.forEach(p => {
+                    const eq1 = [p[4].trim(), p[5].trim()].sort().join(' / ');
+                    const eq2 = [p[6].trim(), p[7].trim()].sort().join(' / ');
+                    const noms = [p[4].trim(), p[5].trim(), p[6].trim(), p[7].trim()];
+                    const s = p.map(v => parseInt(v) || 0);
+                    const gE1 = ((s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0)) > 1;
+
+                    let jugo = false, gano = false;
+                    if (sujeto.includes(' / ')) {
+                        if (eq1 === sujeto) { jugo = true; gano = gE1; }
+                        if (eq2 === sujeto) { jugo = true; gano = !gE1; }
+                    } else {
+                        if (noms.includes(sujeto)) {
+                            jugo = true;
+                            const esE1 = (p[4].trim() === sujeto || p[5].trim() === sujeto);
+                            gano = esE1 ? gE1 : !gE1;
+                        }
+                    }
+
+                    if (jugo) {
+                        pAcc++; if(gano) vAcc++;
+                        resData.push(gano ? 1 : 0);
+                        wrData.push(parseFloat(((vAcc / pAcc) * 100).toFixed(1)));
+                    } else {
+                        resData.push(null);
+                        wrData.push(wrData.length > 0 ? wrData[wrData.length-1] : null);
+                    }
+                });
+
+                const baseCfg = { label: sujeto, borderColor: col, backgroundColor: col, pointRadius: 6, pointHoverRadius: 8, borderDash: idx % 2 === 0 ? [] : [6, 4], spanGaps: true, borderWidth: 3 };
+                datasetsRes.push({ ...baseCfg, data: resData, stepper: true });
+                datasetsWR.push({ ...baseCfg, data: wrData, tension: 0.3, fill: false });
+            });
+
+            if(chart1) chart1.destroy(); if(chart2) chart2.destroy();
+
+            const commonOpts = {
+                responsive: true, maintainAspectRatio: false, devicePixelRatio: 2,
+                layout: { padding: { left: 10, right: 20, top: 25, bottom: 25 } },
+                plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10, weight: 'bold' } } }, tooltip: { mode: 'index', intersect: false } }
             };
 
-            try {
-                await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(datos) });
-                location.reload();
-            } catch (err) {
-                alert("Error al guardar");
-                btn.disabled = false; btn.innerText = "Guardar Resultado";
-            }
-			// Lógica original de envío a Google Script...												
-        };
+            chart1 = new Chart(ctx1.canvas, {
+                type: 'line', data: { labels, datasets: datasetsRes },
+                options: { ...commonOpts, scales: { y: { min: -0.4, max: 1.4, ticks: { stepSize: 1, callback: v => (v === 1 ? 'V' : v === 0 ? 'P' : '') }, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+            });
 
-        function verJugador(n) { document.getElementById('filtroJugador').value = n; aplicarFiltros(); cambiarTab('historial'); }
-		let chart1, chart2;			 
+            const allW = datasetsWR.flatMap(d => d.data).filter(v => v !== null);
+            const minW = allW.length ? Math.min(...allW) : 0;
+            const maxW = allW.length ? Math.max(...allW) : 100;
+
+            chart2 = new Chart(ctx2.canvas, {
+                type: 'line', data: { labels, datasets: datasetsWR },
+                options: { ...commonOpts, scales: { y: { min: minW - 12, max: maxW + 12, ticks: { callback: v => (v >= 0 && v <= 100 ? v + '%' : '') }, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+            });
+        }
+
         function cambiarTab(t) {
             document.getElementById('view-clasificacion').style.display = t === 'clasificacion' ? 'block' : 'none';
             document.getElementById('view-historial').style.display = t === 'historial' ? 'block' : 'none';
+            document.getElementById('view-stats').style.display = t === 'stats' ? 'block' : 'none';
             document.getElementById('btn-tab-clas').className = `pb-3 text-sm font-bold ${t === 'clasificacion' ? 'tab-active' : 'text-slate-400'}`;
             document.getElementById('btn-tab-hist').className = `pb-3 text-sm font-bold ${t === 'historial' ? 'tab-active' : 'text-slate-400'}`;
+            document.getElementById('btn-tab-stats').className = `pb-3 text-sm font-bold ${t === 'stats' ? 'tab-active' : 'text-slate-400'}`;
         }
-		function actualizarGraficos(partidos) {
-			const canvas1 = document.getElementById('chartResultados');
-			const canvas2 = document.getElementById('chartWR');
-			if(!canvas1 || !canvas2) return;
-		
-			const ctx1 = canvas1.getContext('2d');
-			const ctx2 = canvas2.getContext('2d');
-		
-			// OBTENER SELECCIONADOS (Lógica corregida para select multiple)
-			const selJug = Array.from(document.getElementById('select-jugadores-multi').selectedOptions).map(o => o.value);
-			const selPar = Array.from(document.getElementById('select-parejas-multi').selectedOptions).map(o => o.value);
-			let seleccionados = [...selJug, ...selPar];
-		
-			// Fallback al filtro de arriba si no hay nada marcado en los grandes
-			const fJugador = document.getElementById('filtroJugador').value;
-			if (seleccionados.length === 0 && fJugador) {
-				seleccionados = [fJugador];
-			}
-		
-			// Si sigue sin haber nada, borramos gráficas y salimos
-			if (seleccionados.length === 0) {
-				if(chart1) chart1.destroy();
-				if(chart2) chart2.destroy();
-				chart1 = null; chart2 = null;
-				return;
-			}
-		
-			// FILTRAR PARTIDOS: Solo fechas donde alguno de los seleccionados jugó
-			const partidosCron = [...partidos].reverse();
-			const partidosRelevantes = partidosCron.filter(p => {
-				const p1 = [p[4].trim(), p[5].trim()].sort().join(' / ');
-				const p2 = [p[6].trim(), p[7].trim()].sort().join(' / ');
-				const nombres = [p[4].trim(), p[5].trim(), p[6].trim(), p[7].trim()];
-				return seleccionados.some(s => s === p1 || s === p2 || nombres.includes(s));
-			});
-		
-			if (partidosRelevantes.length === 0) return;
-		
-			const labels = partidosRelevantes.map(p => {
-				const d = new Date(parsearFecha(p[1]));
-				return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getFullYear()).slice(-2)}`;
-			});
-		
-			const datasetsRes = [];
-			const datasetsWR = [];
-			const colores = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
-		
-			seleccionados.forEach((sujeto, idx) => {
-				const col = colores[idx % colores.length];
-				let vAcc = 0, pAcc = 0;
-				const resData = [], wrData = [];
-		
-				partidosRelevantes.forEach(p => {
-					const p1 = [p[4].trim(), p[5].trim()].sort().join(' / ');
-					const p2 = [p[6].trim(), p[7].trim()].sort().join(' / ');
-					const nombres = [p[4].trim(), p[5].trim(), p[6].trim(), p[7].trim()];
-					
-					const s = p.map(v => parseInt(v) || 0);
-					const gE1 = ((s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0)) > 1;
-		
-					let jugo = false, gano = false;
-		
-					if (sujeto.includes(' / ')) { // Es Pareja
-						if (p1 === sujeto) { jugo = true; gano = gE1; }
-						if (p2 === sujeto) { jugo = true; gano = !gE1; }
-					} else { // Es Jugador
-						if (nombres.includes(sujeto)) {
-							jugo = true;
-							const esE1 = (p[4].trim() === sujeto || p[5].trim() === sujeto);
-							gano = esE1 ? gE1 : !gE1;
-						}
-					}
-		
-					if (jugo) {
-						pAcc++; if(gano) vAcc++;
-						resData.push(gano ? 1 : 0);
-						wrData.push(parseFloat(((vAcc / pAcc) * 100).toFixed(1)));
-					} else {
-						// Importante: null para Resultados, repetir último para WR para no romper la línea
-						resData.push(null);
-						wrData.push(wrData.length > 0 ? wrData[wrData.length-1] : null);
-					}
-				});
-		
-				datasetsRes.push({
-					label: sujeto,
-					data: resData,
-					borderColor: col,
-					backgroundColor: col,
-					stepper: true,
-					pointRadius: 4,
-					spanGaps: true // Conecta los puntos aunque haya nulos en medio
-				});
-		
-				datasetsWR.push({
-					label: sujeto,
-					data: wrData,
-					borderColor: col,
-					backgroundColor: col,
-					tension: 0.3,
-					fill: false,
-					pointRadius: 4,
-					spanGaps: true
-				});
-			});
-		
-			if(chart1) chart1.destroy();
-			if(chart2) chart2.destroy();
-		
-			const options = {
-				responsive: true,
-				maintainAspectRatio: false,
-				devicePixelRatio: 2,
-				plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } } }
-			};
-		
-			chart1 = new Chart(ctx1, {
-				type: 'line',
-				data: { labels, datasets: datasetsRes },
-				options: { 
-					...options, 
-					scales: { 
-						y: { 
-							min: -0.1, // Margen inferior
-							max: 1.1,  // Margen superior
-							ticks: { 
-								stepSize: 1, 
-								callback: v => {
-									if (v === 1) return 'V';
-									if (v === 0) return 'P';
-									return ''; // Oculta los decimales del margen
-								} 
-							},
-							grid: {
-								display: true,
-								drawBorder: false
-							}
-						} 
-					} 
-				}
-			});
-		
-			// Cálculo de límites con protección
-			const allValues = datasetsWR.flatMap(d => d.data).filter(v => v !== null);
-			// Si el valor más bajo es 0, el mínimo será -5 para dar margen, etc.
-			const minVal = allValues.length ? Math.min(...allValues) - 5 : 0;
-			const maxVal = allValues.length ? Math.max(...allValues) + 5 : 100;
-			
-			chart2 = new Chart(ctx2, {
-				type: 'line',
-				data: { labels, datasets: datasetsWR },
-				options: { 
-					...options, 
-					scales: { 
-						y: { 
-							min: Math.floor(minVal), 
-							max: Math.ceil(maxVal),
-							ticks: { 
-								callback: v => v + '%' 
-							} 
-						} 
-					} 
-				}
-			});
-		}
+
+        function abrirModal() { document.getElementById('modal').style.display = 'flex'; document.getElementById('fechaForm').value = new Date().toISOString().split('T')[0]; }
+        function cerrarModal() { document.getElementById('modal').style.display = 'none'; }
+        function resetFechas() { document.getElementById('fechaInicio').value = ''; document.getElementById('fechaFin').value = ''; aplicarFiltros(); }
+        function verJugador(n) { document.getElementById('filtroJugador').value = n; aplicarFiltros(); cambiarTab('historial'); }
+
+        document.getElementById('formPartido').onsubmit = async (e) => {
+            e.preventDefault();
+            if(document.getElementById('pass').value !== PIN_CORRECTO) return alert("PIN Incorrecto");
+            const btn = document.getElementById('btnSubmit'); btn.disabled = true; btn.innerText = "ENVIANDO...";
+            const parts = document.getElementById('fechaForm').value.split('-');
+            const datos = { fecha: `${parts[2]}/${parts[1]}/${parts[0]}`, temporada: parts[0], lugar: document.getElementById('lugarForm').value, j1: document.getElementById('j1').value, j2: document.getElementById('j2').value, j3: document.getElementById('j3').value, j4: document.getElementById('j4').value, s1e1: document.getElementById('s1e1').value||0, s1e2: document.getElementById('s1e2').value||0, s2e1: document.getElementById('s2e1').value||0, s2e2: document.getElementById('s2e2').value||0, s3e1: document.getElementById('s3e1').value||0, s3e2: document.getElementById('s3e2').value||0 };
+            try { await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(datos) }); location.reload(); } catch (err) { alert("Error"); btn.disabled = false; }
+        };
+
+        function validarJugadores() {
+            const js = [document.getElementById('j1').value, document.getElementById('j2').value, document.getElementById('j3').value, document.getElementById('j4').value].filter(v => v !== "");
+            const esRep = new Set(js).size !== js.length && js.length > 1;
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = esRep; btn.style.background = esRep ? "#ef4444" : "#4f46e5";
+            btn.innerText = esRep ? "REPETIDOS" : "GUARDAR RESULTADO";
+            return !esRep;
+        }
 
         init();
     </script>
