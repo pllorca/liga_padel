@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>														  
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <title>PadelTour Oficial</title>
-    <style>
+	<meta charset="UTF-8">
+		<meta name="viewport"
+		      content="width=device-width, initial-scale=1.0">
+			<script src="https://cdn.tailwindcss.com"/>
+			<script src="https://cdn.jsdelivr.net/npm/chart.js"/>
+			<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
+			      rel="stylesheet">
+				<title>PadelTour Oficial</title>
+				<style>
 	
         body { font-family: 'Inter', sans-serif; }
 		.tab-active { color: #34D399; border-bottom: 2px solid #34D399; }
@@ -21,126 +23,230 @@
         border-color: #0f172a !important; 
         background-color: #f1f5f9 !important;
     }.filtro-inactivo { color: #94a3b8; }
-    canvas { width: 100% !important; height: 300px !important; }		   
+    canvas { width: 100% !important; height: 300px !important; }
     </style>
-</head>
-<body class="bg-slate-50 text-slate-900 pb-20">
-
-    <header class="bg-[#0F172A] border-b border-slate-800 sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-4 pt-4">
-            <div class="flex justify-between items-center mb-4">
-                <h1 class="text-4xl font-black italic text-emerald-400 tracking-tighter uppercase cursor-pointer" onclick="location.reload()">Padel Tour</h1>
-                <button onclick="abrirModal()" class="bg-[#5a6371] text-white px-4 py-2 rounded-xl text-s font-bold">+ RESULTADO</button>
-            </div>
-            <nav class="flex gap-6">
-				<button onclick="cambiarTab('clasificacion')" id="btn-tab-clas" class="pb-3 text-sm font-bold text-[#a9b5c6] tab-active">Clasificación</button>
-                <button onclick="cambiarTab('historial')" id="btn-tab-hist" class="pb-3 text-sm font-bold text-[#a9b5c6]">Partidos</button>
-            </nav>
-        </div>
-    </header>
-
-    <section class="max-w-5xl mx-auto px-4 py-4 flex gap-2 overflow-x-auto">
-        <select id="filtroAnio" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"></select>
-        <select id="filtroLugar" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"><option value="">Pistas</option></select>
-        <select id="filtroJugador" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"><option value="">Jugadores</option></select>
-        <select id="filtroPareja" onchange="aplicarFiltros()" class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"><option value="">Parejas</option></select>
-    </section>
-
-    <main class="max-w-7xl mx-auto px-4">
-        <div id="view-clasificacion" class="block overflow-x-auto">
-            <div class="bg-slate-50 rounded-2xl shadow-sm border border-slate-100 min-w-[750px]">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase">
-                        <tr>
-                            <th class="p-4 w-10">#</th>
-                            <th class="p-4" onclick="ordenarTabla('n')">Jugador <span id="sort-n"></span></th>
-                            <th class="p-4 text-center" onclick="ordenarTabla('pj')">PJ <span id="sort-pj"></span></th>
-                            <th class="p-4 text-center text-indigo-600" onclick="ordenarTabla('wr')">%V <span id="sort-wr"></span></th>
-                            <th class="p-4 text-center text-[#10B981]" onclick="ordenarTabla('v')">G <span id="sort-v"></span></th>
-                            <th class="p-4 text-center text-red-400" onclick="ordenarTabla('d')">P <span id="sort-d"></span></th>
-                            <th class="p-4 text-center">Racha→</th>
-                            <th class="p-4 text-center" onclick="ordenarTabla('sr')">%S <span id="sort-sr"></span></th>
-                            <th class="p-4 text-center" onclick="ordenarTabla('jr')">%J <span id="sort-jr"></span></th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-body" class="divide-y divide-slate-50"></tbody>
-                </table>
-            </div>
-        </div>
-        <div id="view-historial" class="hidden">
-            <div id="historial-cards" class="grid gap-3 md:grid-cols-1"></div>
-        </div>
-		<div id="view-stats" class="hidden space-y-6">
-			<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4">
-				<div class="flex flex-wrap gap-4 items-end">
-					<div class="flex flex-col gap-1">
-						<label class="text-[10px] font-bold text-slate-400 uppercase">Rango de Fechas</label>
-						<div class="flex gap-2 items-center">
-							<input type="date" id="fechaInicio" onchange="aplicarFiltros()" class="border rounded p-1 text-xs">
-								<input type="date" id="fechaFin" onchange="aplicarFiltros()" class="border rounded p-1 text-xs">
-									<button onclick="resetFechas()" class="bg-slate-100 text-slate-500 px-2 py-1 rounded text-[10px] font-bold hover:bg-slate-200">RESET</button>
+			</head>
+			<body class="bg-slate-50 text-slate-900 pb-20">
+				<header class="bg-[#0F172A] border-b border-slate-800 sticky top-0 z-50">
+					<div class="max-w-5xl mx-auto px-4 pt-4">
+						<div class="flex justify-between items-center mb-4">
+							<h1 class="text-4xl font-black italic text-emerald-400 tracking-tighter uppercase cursor-pointer"
+							    onclick="location.reload()">Padel Tour</h1>
+							<button onclick="abrirModal()"
+							        class="bg-[#5a6371] text-white px-4 py-2 rounded-xl text-s font-bold">+ RESULTADO</button>
+						</div>
+						<nav class="flex gap-6">
+							<button onclick="cambiarTab('clasificacion')"
+							        id="btn-tab-clas"
+							        class="pb-3 text-sm font-bold text-[#a9b5c6] tab-active">Clasificación</button>
+							<button onclick="cambiarTab('historial')"
+							        id="btn-tab-hist"
+							        class="pb-3 text-sm font-bold text-[#a9b5c6]">Partidos</button>
+							<button onclick="cambiarTab('stats')"
+							        id="btn-tab-stats"
+							        class="pb-3 text-sm font-bold text-[#a9b5c6]">Gráficas</button>
+						</nav>
+					</div>
+				</header>
+				<section class="max-w-5xl mx-auto px-4 py-4 flex gap-2 overflow-x-auto">
+					<select id="filtroAnio"
+					        onchange="aplicarFiltros()"
+					        class="bg-white border p-2 rounded-lg text-xs font-medium outline-none"/>
+					<select id="filtroLugar"
+					        onchange="aplicarFiltros()"
+					        class="bg-white border p-2 rounded-lg text-xs font-medium outline-none">
+						<option value="">Pistas</option>
+					</select>
+					<select id="filtroJugador"
+					        onchange="aplicarFiltros()"
+					        class="bg-white border p-2 rounded-lg text-xs font-medium outline-none">
+						<option value="">Jugadores</option>
+					</select>
+					<select id="filtroPareja"
+					        onchange="aplicarFiltros()"
+					        class="bg-white border p-2 rounded-lg text-xs font-medium outline-none">
+						<option value="">Parejas</option>
+					</select>
+				</section>
+				<main class="max-w-7xl mx-auto px-4">
+					<div id="view-clasificacion"
+					     class="block overflow-x-auto">
+						<div class="bg-slate-50 rounded-2xl shadow-sm border border-slate-100 min-w-[750px]">
+							<table class="w-full text-left text-xs">
+								<thead class="bg-slate-50 text-slate-500 font-bold uppercase">
+									<tr>
+										<th class="p-4 w-10">#</th>
+										<th class="p-4"
+										    onclick="ordenarTabla('n')">Jugador <span id="sort-n"/>
+										</th>
+										<th class="p-4 text-center"
+										    onclick="ordenarTabla('pj')">PJ <span id="sort-pj"/>
+										</th>
+										<th class="p-4 text-center text-indigo-600"
+										    onclick="ordenarTabla('wr')">%V <span id="sort-wr"/>
+										</th>
+										<th class="p-4 text-center text-[#10B981]"
+										    onclick="ordenarTabla('v')">G <span id="sort-v"/>
+										</th>
+										<th class="p-4 text-center text-red-400"
+										    onclick="ordenarTabla('d')">P <span id="sort-d"/>
+										</th>
+										<th class="p-4 text-center">Racha→</th>
+										<th class="p-4 text-center"
+										    onclick="ordenarTabla('sr')">%S <span id="sort-sr"/>
+										</th>
+										<th class="p-4 text-center"
+										    onclick="ordenarTabla('jr')">%J <span id="sort-jr"/>
+										</th>
+									</tr>
+								</thead>
+								<tbody id="tabla-body"
+								       class="divide-y divide-slate-50"/>
+							</table>
+						</div>
+					</div>
+					<div id="view-historial"
+					     class="hidden">
+						<div id="historial-cards"
+						     class="grid gap-3 md:grid-cols-1"/>
+					</div>
+					<div id="view-stats"
+					     class="hidden space-y-6">
+						<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4">
+							<div class="flex flex-wrap gap-4 items-end">
+								<div class="flex flex-col gap-1">
+									<label class="text-[10px] font-bold text-slate-400 uppercase">Rango de Fechas</label>
+									<div class="flex gap-2 items-center">
+										<input type="date"
+										       id="fechaInicio"
+										       onchange="aplicarFiltros()"
+										       class="border rounded p-1 text-xs">
+											<input type="date"
+											       id="fechaFin"
+											       onchange="aplicarFiltros()"
+											       class="border rounded p-1 text-xs">
+												<button onclick="resetFechas()"
+												        class="bg-slate-100 text-slate-500 px-2 py-1 rounded text-[10px] font-bold hover:bg-slate-200">RESET</button>
+											</div>
+										</div>
+									</div>
+									<div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-3">
+										<div class="flex flex-col gap-1">
+											<label class="text-[10px] font-bold text-slate-400 uppercase">Seleccionar Jugadores</label>
+											<select id="select-jugadores-multi"
+											        multiple
+											        onchange="aplicarFiltros()"
+											        class="border rounded-lg p-2 text-xs h-24 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none"/>
+										</div>
+										<div class="flex flex-col gap-1">
+											<label class="text-[10px] font-bold text-slate-400 uppercase">Seleccionar Parejas</label>
+											<select id="select-parejas-multi"
+											        multiple
+											        onchange="aplicarFiltros()"
+											        class="border rounded-lg p-2 text-xs h-24 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none"/>
+										</div>
+									</div>
+								</div>
+								<div class="grid gap-6">
+									<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+										<h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">Evolución de Resultados</h3>
+										<div class="relative h-[300px] w-full">
+											<canvas id="chartResultados"/>
+										</div>
+									</div>
+									<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+										<h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">Evolución % Victorias</h3>
+										<div class="relative h-[300px] w-full">
+											<canvas id="chartWR"/>
+										</div>
+									</div>
 								</div>
 							</div>
-						</div>
-						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-3">
-							<div class="flex flex-col gap-1">
-								<label class="text-[10px] font-bold text-slate-400 uppercase">Seleccionar Jugadores</label>
-								<select id="select-jugadores-multi" multiple onchange="aplicarFiltros()" class="border rounded-lg p-2 text-xs h-24 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none"/>
-							</div>
-							<div class="flex flex-col gap-1">
-								<label class="text-[10px] font-bold text-slate-400 uppercase">Seleccionar Parejas</label>
-								<select id="select-parejas-multi" multiple onchange="aplicarFiltros()" class="border rounded-lg p-2 text-xs h-24 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none"/>
-							</div>
-						</div>
-					</div>
-					<div class="grid gap-6">
-						<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-							<h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">Evolución de Resultados</h3>
-							<div class="relative h-[300px] w-full">
-								<canvas id="chartResultados"/>
-							</div>
-						</div>
-						<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-							<h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">Evolución % Victorias</h3>
-							<div class="relative h-[300px] w-full">
-								<canvas id="chartWR"/>
-							</div>
-						</div>
-					</div>
-				</div>
-    </main>
-
-    <div id="modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[100] backdrop-blur-sm">
-        <div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl relative">
-            <h2 class="text-xl font-800 mb-6 text-center italic">Nuevo Partido</h2>
-            <form id="formPartido" class="space-y-4">
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="password" id="pass" placeholder="PIN" class="p-3 bg-slate-100 rounded-xl border-0 text-sm text-center font-bold" required>
-                    <input type="date" id="fechaForm" class="p-3 bg-slate-100 rounded-xl border-0 text-xs text-center font-bold" required>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2 bg-indigo-50 p-3 rounded-2xl">
-                        <select id="j1" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
-                        <select id="j2" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
-                    </div>
-                    <div class="space-y-2 bg-slate-50 p-3 rounded-2xl">
-                        <select id="j3" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
-                        <select id="j4" class="w-full p-2 bg-white rounded-lg text-xs border select-jugador" required onchange="validarJugadores()"></select>
-                    </div>
-                </div>
-                <div class="bg-indigo-900 p-4 rounded-2xl flex justify-center gap-2">
-                    <div class="flex gap-1"><input type="number" id="s1e1" class="input-set" oninput="autoTab(this,'s1e2')"><input type="number" id="s1e2" class="input-set" oninput="autoTab(this,'s2e1')"></div>
-                    <div class="flex gap-1"><input type="number" id="s2e1" class="input-set" oninput="autoTab(this,'s2e2')"><input type="number" id="s2e2" class="input-set" oninput="autoTab(this,'s3e1')"></div>
-                    <div class="flex gap-1"><input type="number" id="s3e1" class="input-set" oninput="autoTab(this,'s3e2')"><input type="number" id="s3e2" class="input-set"></div>
-                </div>
-                <input list="listaLugares" id="lugarForm" placeholder="Pista" class="w-full p-3 bg-slate-100 rounded-xl text-sm" required>
-                <datalist id="listaLugares"></datalist>
-                <button id="btnSubmit" type="submit" class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-lg">Guardar Resultado</button>
-                <button type="button" onclick="cerrarModal()" class="w-full text-slate-400 text-xs font-bold uppercase py-2">Cancelar</button>
-            </form>
-        </div>
-    </div>
-
+						</main>
+						<div id="modal"
+						     class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[100] backdrop-blur-sm">
+							<div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl relative">
+								<h2 class="text-xl font-800 mb-6 text-center italic">Nuevo Partido</h2>
+								<form id="formPartido"
+								      class="space-y-4">
+									<div class="grid grid-cols-2 gap-2">
+										<input type="password"
+										       id="pass"
+										       placeholder="PIN"
+										       class="p-3 bg-slate-100 rounded-xl border-0 text-sm text-center font-bold"
+										       required>
+										<input
+										       type="date"
+										       id="fechaForm"
+										       class="p-3 bg-slate-100 rounded-xl border-0 text-xs text-center font-bold"
+										       required>
+									</div>
+									<div
+									     class="grid grid-cols-2 gap-4">
+										<div class="space-y-2 bg-indigo-50 p-3 rounded-2xl">
+											<select id="j1"
+											        class="w-full p-2 bg-white rounded-lg text-xs border select-jugador"
+											        required
+											        onchange="validarJugadores()"/>
+											<select id="j2"
+											        class="w-full p-2 bg-white rounded-lg text-xs border select-jugador"
+											        required
+											        onchange="validarJugadores()"/>
+										</div>
+										<div class="space-y-2 bg-slate-50 p-3 rounded-2xl">
+											<select id="j3"
+											        class="w-full p-2 bg-white rounded-lg text-xs border select-jugador"
+											        required
+											        onchange="validarJugadores()"/>
+											<select id="j4"
+											        class="w-full p-2 bg-white rounded-lg text-xs border select-jugador"
+											        required
+											        onchange="validarJugadores()"/>
+										</div>
+									</div>
+									<div class="bg-indigo-900 p-4 rounded-2xl flex justify-center gap-2">
+										<div class="flex gap-1">
+											<input type="number"
+											       id="s1e1"
+											       class="input-set"
+											       oninput="autoTab(this,'s1e2')">
+												<input type="number"
+												       id="s1e2"
+												       class="input-set"
+												       oninput="autoTab(this,'s2e1')"/>
+												<div class="flex gap-1">
+													<input type="number"
+													       id="s2e1"
+													       class="input-set"
+													       oninput="autoTab(this,'s2e2')">
+														<input type="number"
+														       id="s2e2"
+														       class="input-set"
+														       oninput="autoTab(this,'s3e1')"/>
+														<div class="flex gap-1">
+															<input type="number"
+															       id="s3e1"
+															       class="input-set"
+															       oninput="autoTab(this,'s3e2')">
+																<input type="number"
+																       id="s3e2"
+																       class="input-set"/>
+															</div>
+															<input list="listaLugares"
+															       id="lugarForm"
+															       placeholder="Pista"
+															       class="w-full p-3 bg-slate-100 rounded-xl text-sm"
+															       required>
+															<datalist
+															          id="listaLugares"/>
+															<button id="btnSubmit"
+															        type="submit"
+															        class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-lg">Guardar Resultado</button>
+															<button type="button"
+															        onclick="cerrarModal()"
+															        class="w-full text-slate-400 text-xs font-bold uppercase py-2">Cancelar</button>
+														</form>
+													</div>
     <script>
         const URL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=0&single=true&output=csv';
         const URL_JUGADORES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo0ghUZzZls94FVc7xNyu5EhGSic6h0M98AGuzalUr7J9vgxDDlCC07oUXJso4tch8CtGzk4DkC876/pub?gid=1804776142&single=true&output=csv';
