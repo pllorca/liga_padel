@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>														  
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <title>PadelTour Oficial</title>
     <style>
@@ -14,6 +15,13 @@
         .avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: #e2e8f0; }
         .input-set { width: 1.8rem; height: 2.2rem; background: white; border-radius: 0.25rem; text-align: center; font-weight: bold; font-size: 0.9rem; border: 1px solid #cbd5e1; }
         th { cursor: pointer; transition: 0.2s; white-space: nowrap; }
+		.filtro-activo { 
+        color: #0f172a !important; 
+        font-weight: 800 !important; 
+        border-color: #0f172a !important; 
+        background-color: #f1f5f9 !important;
+    }.filtro-inactivo { color: #94a3b8; }
+    canvas { width: 100% !important; height: 300px !important; }		   
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 pb-20">
@@ -21,8 +29,8 @@
     <header class="bg-[#0F172A] border-b border-slate-800 sticky top-0 z-50">
         <div class="max-w-5xl mx-auto px-4 pt-4">
             <div class="flex justify-between items-center mb-4">
-                <h1 class="text-3xl font-black italic text-emerald-400 tracking-tighter uppercase cursor-pointer" onclick="location.reload()">Padel Tour</h1>
-                <button onclick="abrirModal()" class="bg-[#5a6371] text-white px-2 py-1 rounded-xl text-s font-bold">+ RESULTADO</button>
+                <h1 class="text-4xl font-black italic text-emerald-400 tracking-tighter uppercase cursor-pointer" onclick="location.reload()">Padel Tour</h1>
+                <button onclick="abrirModal()" class="bg-[#5a6371] text-white px-4 py-2 rounded-xl text-s font-bold">+ RESULTADO</button>
             </div>
             <nav class="flex gap-6">
 				<button onclick="cambiarTab('clasificacion')" id="btn-tab-clas" class="pb-3 text-sm font-bold text-[#a9b5c6] tab-active">Clasificación</button>
@@ -47,10 +55,10 @@
                             <th class="p-4 w-10">#</th>
                             <th class="p-4" onclick="ordenarTabla('n')">Jugador <span id="sort-n"></span></th>
                             <th class="p-4 text-center" onclick="ordenarTabla('pj')">PJ <span id="sort-pj"></span></th>
-                            <th class="p-4 text-center text-indigo-600" onclick="ordenarTabla('wr')">%V/D <span id="sort-wr"></span></th>
-                            <th class="p-4 text-center" onclick="ordenarTabla('v')">G <span id="sort-v"></span></th>
+                            <th class="p-4 text-center text-indigo-600" onclick="ordenarTabla('wr')">%V <span id="sort-wr"></span></th>
+                            <th class="p-4 text-center text-[#10B981]" onclick="ordenarTabla('v')">G <span id="sort-v"></span></th>
                             <th class="p-4 text-center text-red-400" onclick="ordenarTabla('d')">P <span id="sort-d"></span></th>
-                            <th class="p-4 text-center">Racha</th>
+                            <th class="p-4 text-center">Racha→</th>
                             <th class="p-4 text-center" onclick="ordenarTabla('sr')">%S <span id="sort-sr"></span></th>
                             <th class="p-4 text-center" onclick="ordenarTabla('jr')">%J <span id="sort-jr"></span></th>
                         </tr>
@@ -60,8 +68,46 @@
             </div>
         </div>
         <div id="view-historial" class="hidden">
-            <div id="historial-cards" class="grid gap-3 md:grid-cols-2"></div>
+            <div id="historial-cards" class="grid gap-3 md:grid-cols-1"></div>
         </div>
+		<div id="view-stats" class="hidden space-y-6">
+			<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4">
+				<div class="flex flex-wrap gap-4 items-end">
+					<div class="flex flex-col gap-1">
+						<label class="text-[10px] font-bold text-slate-400 uppercase">Rango de Fechas</label>
+						<div class="flex gap-2 items-center">
+							<input type="date" id="fechaInicio" onchange="aplicarFiltros()" class="border rounded p-1 text-xs">
+								<input type="date" id="fechaFin" onchange="aplicarFiltros()" class="border rounded p-1 text-xs">
+									<button onclick="resetFechas()" class="bg-slate-100 text-slate-500 px-2 py-1 rounded text-[10px] font-bold hover:bg-slate-200">RESET</button>
+								</div>
+							</div>
+						</div>
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-3">
+							<div class="flex flex-col gap-1">
+								<label class="text-[10px] font-bold text-slate-400 uppercase">Seleccionar Jugadores</label>
+								<select id="select-jugadores-multi" multiple onchange="aplicarFiltros()" class="border rounded-lg p-2 text-xs h-24 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none"/>
+							</div>
+							<div class="flex flex-col gap-1">
+								<label class="text-[10px] font-bold text-slate-400 uppercase">Seleccionar Parejas</label>
+								<select id="select-parejas-multi" multiple onchange="aplicarFiltros()" class="border rounded-lg p-2 text-xs h-24 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none"/>
+							</div>
+						</div>
+					</div>
+					<div class="grid gap-6">
+						<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+							<h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">Evolución de Resultados</h3>
+							<div class="relative h-[300px] w-full">
+								<canvas id="chartResultados"/>
+							</div>
+						</div>
+						<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+							<h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">Evolución % Victorias</h3>
+							<div class="relative h-[300px] w-full">
+								<canvas id="chartWR"/>
+							</div>
+						</div>
+					</div>
+				</div>
     </main>
 
     <div id="modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[100] backdrop-blur-sm">
@@ -154,9 +200,7 @@
 
             const anioActual = new Date().getFullYear().toString();
             const anios = [...new Set(datosPartidos.map(f => f[2]))].filter(Boolean).sort((a,b) => b-a);
-            document.getElementById('filtroAnio').innerHTML = '<option value="">Años</option>' + anios.map(a => `<option value="${a}" ${a === anioActual ? 'selected' : ''}>${a}</option>`).join('');
-            
-            const lugares = [...new Set(datosPartidos.map(f => f[3]))].filter(Boolean);
+            document.getElementById('filtroAnio').innerHTML = '<option value="">Años</option>' + anios.map(a => `<option value="${a}" ${a===anioActual ?'selected' :'' }>${a}< option>`).join(''); const lugares=[...new Set(datosPartidos.map(f=> f[3]))].filter(Boolean);
             document.getElementById('filtroLugar').innerHTML = '<option value="">Pistas</option>' + lugares.map(l => `<option value="${l}">${l}</option>`).join('');
             document.getElementById('listaLugares').innerHTML = lugares.map(l => `<option value="${l}">`).join('');
 
@@ -166,34 +210,77 @@
                 if(p[6] && p[7]) parejasSet.add([p[6].trim(), p[7].trim()].sort().join(' / '));
             });
             document.getElementById('filtroPareja').innerHTML = '<option value="">Parejas</option>' + [...parejasSet].sort().map(p => `<option value="${p}">${p}</option>`).join('');
-
+			generarCheckboxes();
             aplicarFiltros();
         }
-
+		
+		function generarCheckboxes() {
+			const selJug = document.getElementById('select-jugadores-multi');
+			const selPar = document.getElementById('select-parejas-multi');
+			if(!selJug || !selPar) return;
+		
+			// Limpiar selects antes de llenar
+			selJug.innerHTML = '';
+			selPar.innerHTML = '';
+		
+			const jugadores = Object.keys(infoJugadores).sort();
+			const parejasSet = new Set();
+			
+			datosPartidos.forEach(p => {
+				if(p[4] && p[5]) parejasSet.add([p[4].trim(), p[5].trim()].sort().join(' / '));
+				if(p[6] && p[7]) parejasSet.add([p[6].trim(), p[7].trim()].sort().join(' / '));
+			});
+		
+			jugadores.forEach(j => {
+				const opt = document.createElement('option');
+				opt.value = j;
+				opt.text = j;
+				selJug.appendChild(opt);
+			});
+		
+			[...parejasSet].sort().forEach(p => {
+				const opt = document.createElement('option');
+				opt.value = p;
+				opt.text = p;
+				selPar.appendChild(opt);
+			});
+		}
         function aplicarFiltros() {
-            const fAnio = document.getElementById('filtroAnio').value;
-            const fLugar = document.getElementById('filtroLugar').value;
-            const fJug = document.getElementById('filtroJugador').value;
-            const fPar = document.getElementById('filtroPareja').value;
-
-            const filtrados = datosPartidos.filter(f => {
-                const p1 = [f[4].trim(), f[5].trim()].sort().join(' / ');
-                const p2 = [f[6].trim(), f[7].trim()].sort().join(' / ');
-                return (!fAnio || f[2] === fAnio) && 
-                       (!fLugar || f[3] === fLugar) && 
-                       (!fJug || [f[4],f[5],f[6],f[7]].map(n => n.trim()).includes(fJug)) &&
-                       (!fPar || (p1 === fPar || p2 === fPar));
-            });
-            procesarStats(filtrados);
-        }
-
-        function procesarStats(partidos) {
-            let stats = {};
-            Object.keys(infoJugadores).forEach(n => stats[n] = {v:0, d:0, pj:0, sg:0, st:0, jg:0, jt:0, racha:[]});
+			const ids = ['filtroAnio', 'filtroLugar', 'filtroJugador', 'filtroPareja'];
+			ids.forEach(id => {
+				const el = document.getElementById(id);
+				if (el.value !== "") {
+					el.classList.add('filtro-activo');
+					el.classList.remove('text-slate-900');
+				} else {
+					el.classList.remove('filtro-activo');
+					el.classList.add('text-slate-400');
+				}
+			});
+			
+			const fAnio = document.getElementById('filtroAnio').value;
+			const fLugar = document.getElementById('filtroLugar').value;
+			const fJug = document.getElementById('filtroJugador').value;
+			const fPar = document.getElementById('filtroPareja').value;
+			const fIni = document.getElementById('fechaInicio').value ? new Date(document.getElementById('fechaInicio').value).getTime() : 0;
+			const fFin = document.getElementById('fechaFin').value ? new Date(document.getElementById('fechaFin').value).getTime() : Infinity;
+			
+			const filtrados = datosPartidos.filter(f => {
+				const p1 = [f[4].trim(), f[5].trim()].sort().join(' / ');
+				const p2 = [f[6].trim(), f[7].trim()].sort().join(' / ');
+				const fechaPart = parsearFecha(f[1]);
+				
+				return (!fAnio || f[2] === fAnio) && 
+						(!fLugar || f[3] === fLugar) && 
+						(!fJug || [f[4],f[5],f[6],f[7]].map(n => n.trim()).includes(fJug)) &&
+						(!fPar || (p1 === fPar || p2 === fPar)) &&
+						(fechaPart >= fIni && fechaPart <= fFin); }); procesarStats(filtrados); actualizarGraficos(filtrados); Nueva función } function procesarStats(partidos) { let stats={}; Object.keys(infoJugadores).forEach(n=> stats[n] = {v:0, d:0, pj:0, sg:0, st:0, jg:0, jt:0, racha:[]});
+						   
+																												   
 
             partidos.forEach(c => {
                 const s = c.map(v => parseInt(v) || 0);
-                // Lógica de sets: [8]-[9], [10]-[11], [12]-[13]
+																 
                 const sE1 = (s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0);
                 const sE2 = (s[9]>s[8]?1:0)+(s[11]>s[10]?1:0)+(s[13]>s[12]?1:0);
                 const ganoE1 = sE1 > sE2;
@@ -211,7 +298,7 @@
                 if(c[7]) act(c[7], !ganoE1, sE2, sE1, s[9]+s[11]+s[13], s[8]+s[10]+s[12]);
             });
 
-										  
+			
             rankingMostrado = Object.keys(stats).filter(n => stats[n].pj > 0).map(n => ({
                 n, ...stats[n],
                 wr: (stats[n].v/stats[n].pj)*100,
@@ -237,19 +324,21 @@
 
             document.getElementById('tabla-body').innerHTML = sorted.map(j => `
                 <tr class="hover:bg-slate-50">
-                    <td class="p-4 font-bold text-slate-400">#${j.rankFijo}</td>
-                    <td class="p-4 flex items-center gap-3 cursor-pointer" onclick="verJugador('${j.n}')">
-                        <img src="${infoJugadores[j.n] || 'https://via.placeholder.com/100'}" class="avatar">
-                        <span class="font-bold text-indigo-600">${j.n}</span>
-                    </td>
-                    <td class="p-4 text-center">${j.pj}</td>
-                    <td class="p-4 text-center font-bold text-indigo-600">${j.wr.toFixed(1)}%</td>
-                    <td class="p-4 text-center text-emerald-600 font-bold">${j.v}</td>
-                    <td class="p-4 text-center text-red-400 font-bold">${j.d}</td>
-                    <td class="p-4 text-center"><div class="flex justify-center gap-1">${j.ultimos.map(r => `<span class="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white ${r==='V'?'bg-emerald-500':'bg-red-500'}">${r}</span>`).join('')}</div></td>
-                    <td class="p-4 text-center">${j.sr.toFixed(0)}%</td>
-                    <td class="p-4 text-center">${j.jr.toFixed(0)}%</td>
-                </tr>`).join('');
+																		<td class="p-4 font-bold text-slate-400">#${j.rankFijo}</td>
+																		<td class="p-4 flex items-center gap-3 cursor-pointer" onclick="verJugador('${j.n}')">
+																			<img src="${infoJugadores[j.n] || 'https://via.placeholder.com/100'}" class="avatar">
+																				<span class="font-bold text-indigo-600">${j.n}</span>
+																			</td>
+																			<td class="p-4 text-center font-bold text-slate-500">${j.pj}</td>
+																			<td class="p-4 text-center font-bold text-indigo-600">${j.wr.toFixed(1)}%</td>
+																			<td class="p-4 text-center text-[#10B981] font-bold">${j.v}</td>
+																			<td class="p-4 text-center text-red-500 font-bold">${j.d}</td>
+																			<td class="p-4 text-center">
+																				<div class="flex justify-center gap-1">${j.ultimos.map(r => `<span class="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white ${r==='V'?'bg-emerald-500':'bg-red-500'}">${r}</span>`).join('')}</div>
+																			</td>
+																			<td class="p-4 text-center">${j.sr.toFixed(0)}%</td>
+																			<td class="p-4 text-center">${j.jr.toFixed(0)}%</td>
+																		</tr>`).join('');
         }
 
         function ordenarTabla(campo) {
@@ -266,15 +355,18 @@
                 const ganoE1 = sE1 > sE2;
                 return `
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3">
-                    <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase"><span>${c[1]}</span> <span>${c[3]}</span></div>
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="text-[11px] w-1/3 leading-tight ${ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[4]} / ${c[5]}</div>
-                        <div class="bg-indigo-50 text-indigo-600 px-2 py-1 rounded-lg font-mono text-[10px] font-bold">
+																			<div class="flex justify-between text-[13px] font-bold text-slate-400 uppercase">
+																				<span>${c[1]}</span>
+																				<span>${c[3]}</span>
+																			</div>
+																			<div class="flex items-center justify-between gap-2">
+																				<div class="text-[15px] w-1/3 leading-tight ${ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[4]} / ${c[5]}</div>
+																				<div class="bg-indigo-50 text-indigo-600 px-2 py-1 rounded-lg font-mono text-[18px] font-bold">
                             ${s[8]}-${s[9]} | ${s[10]}-${s[11]}${ (s[12]>0 || s[13]>0) ? ` | ${s[12]}-${s[13]}` : ''}
                         </div>
-                        <div class="text-[11px] w-1/3 text-right leading-tight ${!ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[6]} / ${c[7]}</div>
-                    </div>
-                </div>`;
+																				<div class="text-[15px] w-1/3 text-right leading-tight ${!ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[6]} / ${c[7]}</div>
+																			</div>
+																		</div>`;
             }).join('');
         }
 
@@ -295,6 +387,11 @@
             document.getElementById('modal').style.display = 'flex';
         }
 
+		function resetFechas() {
+			document.getElementById('fechaInicio').value = '';
+			document.getElementById('fechaFin').value = '';
+			aplicarFiltros();
+		}
         function cerrarModal() { document.getElementById('modal').style.display = 'none'; }
 
         document.getElementById('formPartido').onsubmit = async (e) => {
@@ -311,7 +408,7 @@
             const fechaBonita = `${parts[2]}/${parts[1]}/${parts[0]}`;
 
             const datos = {
-                password: pin,
+							  
                 fecha: fechaBonita,
                 temporada: parts[0],
                 lugar: document.getElementById('lugarForm').value,
@@ -329,15 +426,182 @@
                 alert("Error al guardar");
                 btn.disabled = false; btn.innerText = "Guardar Resultado";
             }
+			// Lógica original de envío a Google Script...												
         };
 
         function verJugador(n) { document.getElementById('filtroJugador').value = n; aplicarFiltros(); cambiarTab('historial'); }
+		let chart1, chart2;			 
         function cambiarTab(t) {
             document.getElementById('view-clasificacion').style.display = t === 'clasificacion' ? 'block' : 'none';
             document.getElementById('view-historial').style.display = t === 'historial' ? 'block' : 'none';
             document.getElementById('btn-tab-clas').className = `pb-3 text-sm font-bold ${t === 'clasificacion' ? 'tab-active' : 'text-slate-400'}`;
             document.getElementById('btn-tab-hist').className = `pb-3 text-sm font-bold ${t === 'historial' ? 'tab-active' : 'text-slate-400'}`;
         }
+		function actualizarGraficos(partidos) {
+			const canvas1 = document.getElementById('chartResultados');
+			const canvas2 = document.getElementById('chartWR');
+			if(!canvas1 || !canvas2) return;
+		
+			const ctx1 = canvas1.getContext('2d');
+			const ctx2 = canvas2.getContext('2d');
+		
+			// OBTENER SELECCIONADOS (Lógica corregida para select multiple)
+			const selJug = Array.from(document.getElementById('select-jugadores-multi').selectedOptions).map(o => o.value);
+			const selPar = Array.from(document.getElementById('select-parejas-multi').selectedOptions).map(o => o.value);
+			let seleccionados = [...selJug, ...selPar];
+		
+			// Fallback al filtro de arriba si no hay nada marcado en los grandes
+			const fJugador = document.getElementById('filtroJugador').value;
+			if (seleccionados.length === 0 && fJugador) {
+				seleccionados = [fJugador];
+			}
+		
+			// Si sigue sin haber nada, borramos gráficas y salimos
+			if (seleccionados.length === 0) {
+				if(chart1) chart1.destroy();
+				if(chart2) chart2.destroy();
+				chart1 = null; chart2 = null;
+				return;
+			}
+		
+			// FILTRAR PARTIDOS: Solo fechas donde alguno de los seleccionados jugó
+			const partidosCron = [...partidos].reverse();
+			const partidosRelevantes = partidosCron.filter(p => {
+				const p1 = [p[4].trim(), p[5].trim()].sort().join(' / ');
+				const p2 = [p[6].trim(), p[7].trim()].sort().join(' / ');
+				const nombres = [p[4].trim(), p[5].trim(), p[6].trim(), p[7].trim()];
+				return seleccionados.some(s => s === p1 || s === p2 || nombres.includes(s));
+			});
+		
+			if (partidosRelevantes.length === 0) return;
+		
+			const labels = partidosRelevantes.map(p => {
+				const d = new Date(parsearFecha(p[1]));
+				return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getFullYear()).slice(-2)}`;
+			});
+		
+			const datasetsRes = [];
+			const datasetsWR = [];
+			const colores = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+		
+			seleccionados.forEach((sujeto, idx) => {
+				const col = colores[idx % colores.length];
+				let vAcc = 0, pAcc = 0;
+				const resData = [], wrData = [];
+		
+				partidosRelevantes.forEach(p => {
+					const p1 = [p[4].trim(), p[5].trim()].sort().join(' / ');
+					const p2 = [p[6].trim(), p[7].trim()].sort().join(' / ');
+					const nombres = [p[4].trim(), p[5].trim(), p[6].trim(), p[7].trim()];
+					
+					const s = p.map(v => parseInt(v) || 0);
+					const gE1 = ((s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0)) > 1;
+		
+					let jugo = false, gano = false;
+		
+					if (sujeto.includes(' / ')) { // Es Pareja
+						if (p1 === sujeto) { jugo = true; gano = gE1; }
+						if (p2 === sujeto) { jugo = true; gano = !gE1; }
+					} else { // Es Jugador
+						if (nombres.includes(sujeto)) {
+							jugo = true;
+							const esE1 = (p[4].trim() === sujeto || p[5].trim() === sujeto);
+							gano = esE1 ? gE1 : !gE1;
+						}
+					}
+		
+					if (jugo) {
+						pAcc++; if(gano) vAcc++;
+						resData.push(gano ? 1 : 0);
+						wrData.push(parseFloat(((vAcc / pAcc) * 100).toFixed(1)));
+					} else {
+						// Importante: null para Resultados, repetir último para WR para no romper la línea
+						resData.push(null);
+						wrData.push(wrData.length > 0 ? wrData[wrData.length-1] : null);
+					}
+				});
+		
+				datasetsRes.push({
+					label: sujeto,
+					data: resData,
+					borderColor: col,
+					backgroundColor: col,
+					stepper: true,
+					pointRadius: 4,
+					spanGaps: true // Conecta los puntos aunque haya nulos en medio
+				});
+		
+				datasetsWR.push({
+					label: sujeto,
+					data: wrData,
+					borderColor: col,
+					backgroundColor: col,
+					tension: 0.3,
+					fill: false,
+					pointRadius: 4,
+					spanGaps: true
+				});
+			});
+		
+			if(chart1) chart1.destroy();
+			if(chart2) chart2.destroy();
+		
+			const options = {
+				responsive: true,
+				maintainAspectRatio: false,
+				devicePixelRatio: 2,
+				plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } } }
+			};
+		
+			chart1 = new Chart(ctx1, {
+				type: 'line',
+				data: { labels, datasets: datasetsRes },
+				options: { 
+					...options, 
+					scales: { 
+						y: { 
+							min: -0.1, // Margen inferior
+							max: 1.1,  // Margen superior
+							ticks: { 
+								stepSize: 1, 
+								callback: v => {
+									if (v === 1) return 'V';
+									if (v === 0) return 'P';
+									return ''; // Oculta los decimales del margen
+								} 
+							},
+							grid: {
+								display: true,
+								drawBorder: false
+							}
+						} 
+					} 
+				}
+			});
+		
+			// Cálculo de límites con protección
+			const allValues = datasetsWR.flatMap(d => d.data).filter(v => v !== null);
+			// Si el valor más bajo es 0, el mínimo será -5 para dar margen, etc.
+			const minVal = allValues.length ? Math.min(...allValues) - 5 : 0;
+			const maxVal = allValues.length ? Math.max(...allValues) + 5 : 100;
+			
+			chart2 = new Chart(ctx2, {
+				type: 'line',
+				data: { labels, datasets: datasetsWR },
+				options: { 
+					...options, 
+					scales: { 
+						y: { 
+							min: Math.floor(minVal), 
+							max: Math.ceil(maxVal),
+							ticks: { 
+								callback: v => v + '%' 
+							} 
+						} 
+					} 
+				}
+			});
+		}
 
         init();
     </script>
