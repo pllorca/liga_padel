@@ -227,6 +227,29 @@
             [...parejasSet].sort().forEach(p => selPar.innerHTML += `<option value="${p}">${p}</option>`);
         }
 
+		function ordenarTabla(campo) {
+			if (ordenConfig.campo === campo) {
+				ordenConfig.sentido *= -1;
+			} else {
+				ordenConfig.campo = campo;
+				ordenConfig.sentido = -1; // Por defecto descendente (los mejores arriba)
+			}
+		
+			rankingMostrado.sort((a, b) => {
+				let valA = a[campo];
+				let valB = b[campo];
+				
+				// Si es numérico, comparar como número
+				if (typeof valA === 'number') {
+					return (valA - valB) * ordenConfig.sentido;
+				}
+				// Si es texto, comparar alfabéticamente
+				return valA.toString().localeCompare(valB.toString()) * ordenConfig.sentido;
+			});
+		
+			renderizarRanking();
+		}
+
         function aplicarFiltros() {
             const fAnio = document.getElementById('filtroAnio').value;
             const fLugar = document.getElementById('filtroLugar').value;
@@ -304,122 +327,149 @@
         }
 
         function renderizarHistorial(partidos) {
-            document.getElementById('historial-cards').innerHTML = partidos.map(c => {
-                const s = c.map(v => parseInt(v) || 0);
-                const sE1 = (s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0);
-                const sE2 = (s[9]>s[8]?1:0)+(s[11]>s[10]?1:0)+(s[13]>s[12]?1:0);
-                const ganoE1 = sE1 > sE2;
-                return `
-                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3">
-                    <div class="flex justify-between text-[11px] font-bold text-slate-400 uppercase">
-                        <span>${c[1]}</span><span>${c[3]}</span>
-                    </div>
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="text-[12px] w-1/3 leading-tight ${ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[4]} / ${c[5]}</div>
-                        <div class="bg-white/50 backdrop-blur-sm text-indigo-700 px-3 py-1.5 rounded-xl border border-indigo-100 shadow-sm font-mono text-[12px] font-bold tracking-tight">
-                            ${s[8]}-${s[9]} | ${s[10]}-${s[11]}${ (s[12]>0 || s[13]>0) ? ` | ${s[12]}-${s[13]}` : ''}
-                        </div>
-                        <div class="text-[12px] w-1/3 text-right leading-tight ${!ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[6]} / ${c[7]}</div>
-                    </div>
-                </div>`;
-            }).join('');
-        }
+			document.getElementById('historial-cards').innerHTML = partidos.map(c => {
+				const s = c.map(v => parseInt(v) || 0);
+				const sE1 = (s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0);
+				const sE2 = (s[9]>s[8]?1:0)+(s[11]>s[10]?1:0)+(s[13]>s[12]?1:0);
+				const ganoE1 = sE1 > sE2;
+				return `
+				<div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-2">
+					<div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase px-1">
+						<span>${c[1]}</span><span>${c[3]}</span>
+					</div>
+					<div class="flex items-center gap-2">
+						<div class="text-[11px] flex-1 leading-tight ${ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[4]} / ${c[5]}</div>
+						
+						<div class="flex-shrink-0 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100 font-mono text-[11px] font-bold flex gap-1">
+							<span class="${s[8]>s[9]?'text-indigo-600':''}">${s[8]}-${s[9]}</span>
+							<span class="text-slate-300">|</span>
+							<span class="${s[10]>s[11]?'text-indigo-600':''}">${s[10]}-${s[11]}</span>
+							${(s[12]>0 || s[13]>0) ? `<span class="text-slate-300">|</span><span class="${s[12]>s[13]?'text-indigo-600':''}">${s[12]}-${s[13]}</span>` : ''}
+						</div>
+		
+						<div class="text-[11px] flex-1 text-right leading-tight ${!ganoE1 ? 'font-black text-indigo-700' : 'text-slate-500'}">${c[6]} / ${c[7]}</div>
+					</div>
+				</div>`;
+			}).join('');
+		}
 
         function actualizarGraficos(partidos) {
-            const canvas1 = document.getElementById('chartResultados');
-            const canvas2 = document.getElementById('chartWR');
-            if(!canvas1 || !canvas2) return;
-
-            const selJug = Array.from(document.getElementById('select-jugadores-multi').selectedOptions).map(o => o.value);
-            const selPar = Array.from(document.getElementById('select-parejas-multi').selectedOptions).map(o => o.value);
-            let seleccionados = [...selJug, ...selPar];
-            const fJugador = document.getElementById('filtroJugador').value;
-            if (seleccionados.length === 0 && fJugador) seleccionados = [fJugador];
-
-            if (seleccionados.length === 0) {
-                if(chart1) chart1.destroy(); if(chart2) chart2.destroy();
-                return;
-            }
-
-            const partidosCron = [...partidos].reverse();
-            const relevantes = partidosCron.filter(p => {
-                const eq1 = [p[4].trim(), p[5].trim()].sort().join(' / ');
-                const eq2 = [p[6].trim(), p[7].trim()].sort().join(' / ');
-                const noms = [p[4].trim(), p[5].trim(), p[6].trim(), p[7].trim()];
-                return seleccionados.some(s => s === eq1 || s === eq2 || noms.includes(s));
-            });
-
-            if (relevantes.length === 0) return;
-
-            const labels = relevantes.map(p => {
-                const d = new Date(parsearFecha(p[1]));
-                return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getFullYear()).slice(-2)}`;
-            });
-
-            const datasetsRes = []; const datasetsWR = [];
-            const colores = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
-
-            seleccionados.forEach((sujeto, idx) => {
-                const col = colores[idx % colores.length];
-                let vAcc = 0, pAcc = 0;
-                const resData = [], wrData = [];
-
-                relevantes.forEach(p => {
-                    const eq1 = [p[4].trim(), p[5].trim()].sort().join(' / ');
-                    const eq2 = [p[6].trim(), p[7].trim()].sort().join(' / ');
-                    const noms = [p[4].trim(), p[5].trim(), p[6].trim(), p[7].trim()];
-                    const s = p.map(v => parseInt(v) || 0);
-                    const gE1 = ((s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0)) > 1;
-
-                    let jugo = false, gano = false;
-                    if (sujeto.includes(' / ')) {
-                        if (eq1 === sujeto) { jugo = true; gano = gE1; }
-                        if (eq2 === sujeto) { jugo = true; gano = !gE1; }
-                    } else {
-                        if (noms.includes(sujeto)) {
-                            jugo = true;
-                            const esE1 = (p[4].trim() === sujeto || p[5].trim() === sujeto);
-                            gano = esE1 ? gE1 : !gE1;
-                        }
-                    }
-
-                    if (jugo) {
-                        pAcc++; if(gano) vAcc++;
-                        resData.push(gano ? 1 : 0);
-                        wrData.push(parseFloat(((vAcc / pAcc) * 100).toFixed(1)));
-                    } else {
-                        resData.push(null);
-                        wrData.push(wrData.length > 0 ? wrData[wrData.length-1] : null);
-                    }
-                });
-
-                const baseCfg = { label: sujeto, borderColor: col, backgroundColor: col, pointRadius: 6, pointHoverRadius: 8, borderDash: idx % 2 === 0 ? [] : [6, 4], spanGaps: true, borderWidth: 3 };
-                datasetsRes.push({ ...baseCfg, data: resData, stepper: true });
-                datasetsWR.push({ ...baseCfg, data: wrData, tension: 0.3, fill: false });
-            });
-
-            if(chart1) chart1.destroy(); if(chart2) chart2.destroy();
-
-            const commonOpts = {
-                responsive: true, maintainAspectRatio: false, devicePixelRatio: 2,
-                layout: { padding: { left: 10, right: 20, top: 25, bottom: 25 } },
-                plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10, weight: 'bold' } } }, tooltip: { mode: 'index', intersect: false } }
-            };
-
-            chart1 = new Chart(ctx1.canvas, {
-                type: 'line', data: { labels, datasets: datasetsRes },
-                options: { ...commonOpts, scales: { y: { min: -0.4, max: 1.4, ticks: { stepSize: 1, callback: v => (v === 1 ? 'V' : v === 0 ? 'P' : '') }, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
-            });
-
-            const allW = datasetsWR.flatMap(d => d.data).filter(v => v !== null);
-            const minW = allW.length ? Math.min(...allW) : 0;
-            const maxW = allW.length ? Math.max(...allW) : 100;
-
-            chart2 = new Chart(ctx2.canvas, {
-                type: 'line', data: { labels, datasets: datasetsWR },
-                options: { ...commonOpts, scales: { y: { min: minW - 12, max: maxW + 12, ticks: { callback: v => (v >= 0 && v <= 100 ? v + '%' : '') }, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
-            });
-        }
+			// 1. Buscamos los cuadros de las gráficas en el HTML
+			const canvas1 = document.getElementById('chartResultados');
+			const canvas2 = document.getElementById('chartWR');
+			if(!canvas1 || !canvas2) return;
+		
+			// 2. IMPORTANTE: Definimos el contexto de dibujo
+			const ctx1 = canvas1.getContext('2d');
+			const ctx2 = canvas2.getContext('2d');
+		
+			// 3. Obtenemos quiénes están seleccionados para comparar
+			const selJug = Array.from(document.getElementById('select-jugadores-multi').selectedOptions).map(o => o.value);
+			const selPar = Array.from(document.getElementById('select-parejas-multi').selectedOptions).map(o => o.value);
+			let seleccionados = [...selJug, ...selPar];
+			
+			// Si no hay nada en el multi-select, usamos el filtro principal de jugador
+			const fJugador = document.getElementById('filtroJugador').value;
+			if (seleccionados.length === 0 && fJugador) seleccionados = [fJugador];
+		
+			// Si no hay nadie seleccionado, borramos las gráficas anteriores y salimos
+			if (seleccionados.length === 0) {
+				if(chart1) chart1.destroy(); if(chart2) chart2.destroy();
+				return;
+			}
+		
+			// 4. Preparamos los datos (Orden cronológico: de más viejo a más nuevo)
+			const partidosCron = [...partidos].reverse();
+			
+			// Filtramos solo los partidos donde aparezca alguno de los seleccionados
+			const relevantes = partidosCron.filter(p => {
+				const noms = [p[4].trim(), p[5].trim(), p[6].trim(), p[7].trim()];
+				const eq1 = [p[4].trim(), p[5].trim()].sort().join(' / ');
+				const eq2 = [p[6].trim(), p[7].trim()].sort().join(' / ');
+				return seleccionados.some(s => s === eq1 || s === eq2 || noms.includes(s));
+			});
+		
+			if (relevantes.length === 0) return;
+		
+			// Etiquetas del eje X (Fechas)
+			const labels = relevantes.map(p => {
+				const d = new Date(parsearFecha(p[1]));
+				return `${String(d.getDate())}/${String(d.getMonth() + 1)}`;
+			});
+		
+			const datasetsRes = []; 
+			const datasetsWR = [];
+			const colores = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+		
+			// 5. Calculamos las líneas para cada persona/pareja seleccionada
+			seleccionados.forEach((sujeto, idx) => {
+				const col = colores[idx % colores.length];
+				let vAcc = 0, pAcc = 0;
+				const resData = [], wrData = [];
+		
+				relevantes.forEach(p => {
+					const s = p.map(v => parseInt(v) || 0);
+					const gE1 = ((s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0)) > 1;
+					const noms = [p[4].trim(), p[5].trim(), p[6].trim(), p[7].trim()];
+					const eq1 = [p[4].trim(), p[5].trim()].sort().join(' / ');
+					const eq2 = [p[6].trim(), p[7].trim()].sort().join(' / ');
+		
+					let jugo = false, gano = false;
+					
+					// Lógica para saber si el "sujeto" es una pareja o un jugador individual
+					if (sujeto.includes(' / ')) {
+						if (eq1 === sujeto) { jugo = true; gano = gE1; }
+						else if (eq2 === sujeto) { jugo = true; gano = !gE1; }
+					} else {
+						if (noms.includes(sujeto)) {
+							jugo = true;
+							const esE1 = (p[4].trim() === sujeto || p[5].trim() === sujeto);
+							gano = esE1 ? gE1 : !gE1;
+						}
+					}
+		
+					if (jugo) {
+						pAcc++; if(gano) vAcc++;
+						resData.push(gano ? 1 : 0); // 1 para victoria, 0 para derrota
+						wrData.push(parseFloat(((vAcc / pAcc) * 100).toFixed(1))); // % acumulado
+					} else {
+						resData.push(null); // No jugó ese día
+						wrData.push(wrData.length > 0 ? wrData[wrData.length-1] : null);
+					}
+				});
+		
+				// Configuración visual de la línea
+				const configLinea = { 
+					label: sujeto, 
+					borderColor: col, 
+					backgroundColor: col, 
+					spanGaps: true, 
+					borderWidth: 3,
+					pointRadius: 4
+				};
+		
+				datasetsRes.push({ ...configLinea, data: resData, stepper: true });
+				datasetsWR.push({ ...configLinea, data: wrData, tension: 0.3 });
+			});
+		
+			// 6. CREAR LAS GRÁFICAS FINALES
+			if(chart1) chart1.destroy(); 
+			if(chart2) chart2.destroy();
+		
+			const commonOpts = { responsive: true, maintainAspectRatio: false };
+		
+			chart1 = new Chart(ctx1, {
+				type: 'line',
+				data: { labels, datasets: datasetsRes },
+				options: { ...commonOpts, scales: { y: { min: -0.2, max: 1.2, ticks: { callback: v => v===1?'V':v===0?'D':'' } } } }
+			});
+		
+			chart2 = new Chart(ctx2, {
+				type: 'line',
+				data: { labels, datasets: datasetsWR },
+				options: { ...commonOpts, scales: { y: { ticks: { callback: v => v + '%' } } } }
+			});
+		}
 
         function cambiarTab(t) {
             document.getElementById('view-clasificacion').style.display = t === 'clasificacion' ? 'block' : 'none';
@@ -457,6 +507,5 @@
     </script>
 </body>
 </html>
-
 
 
