@@ -485,14 +485,56 @@
         function resetFechas() { document.getElementById('fechaInicio').value = ''; document.getElementById('fechaFin').value = ''; aplicarFiltros(); }
         function verJugador(n) { document.getElementById('filtroJugador').value = n; aplicarFiltros(); cambiarTab('historial'); }
 
-        document.getElementById('formPartido').onsubmit = async (e) => {
-            e.preventDefault();
-            if(document.getElementById('pass').value !== PIN_CORRECTO) return alert("PIN Incorrecto");
-            const btn = document.getElementById('btnSubmit'); btn.disabled = true; btn.innerText = "ENVIANDO...";
-            const parts = document.getElementById('fechaForm').value.split('-');
-            const datos = { fecha: `${parts[2]}/${parts[1]}/${parts[0]}`, temporada: parts[0], lugar: document.getElementById('lugarForm').value, j1: document.getElementById('j1').value, j2: document.getElementById('j2').value, j3: document.getElementById('j3').value, j4: document.getElementById('j4').value, s1e1: document.getElementById('s1e1').value||0, s1e2: document.getElementById('s1e2').value||0, s2e1: document.getElementById('s2e1').value||0, s2e2: document.getElementById('s2e2').value||0, s3e1: document.getElementById('s3e1').value||0, s3e2: document.getElementById('s3e2').value||0 };
-            try { await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(datos) }); location.reload(); } catch (err) { alert("Error"); btn.disabled = false; }
-        };
+         document.getElementById('formPartido').onsubmit = async(e) => {
+     e.preventDefault();
+
+     if (document.getElementById('pass').value !== PIN_CORRECTO)
+         return alert("PIN Incorrecto");
+
+     const btn = document.getElementById('btnSubmit');
+     btn.disabled = true;
+     btn.innerText = "ENVIANDO...";
+
+     const parts = document.getElementById('fechaForm').value.split('-');
+     const datos = {
+         fecha: `${parts[2]}/${parts[1]}/${parts[0]}`,
+         temporada: parts[0],
+         lugar: document.getElementById('lugarForm').value,
+         j1: document.getElementById('j1').value,
+         j2: document.getElementById('j2').value,
+         j3: document.getElementById('j3').value,
+         j4: document.getElementById('j4').value,
+         s1e1: document.getElementById('s1e1').value || 0,
+         s1e2: document.getElementById('s1e2').value || 0,
+         s2e1: document.getElementById('s2e1').value || 0,
+         s2e2: document.getElementById('s2e2').value || 0,
+         s3e1: document.getElementById('s3e1').value || 0,
+         s3e2: document.getElementById('s3e2').value || 0
+     };
+     try {
+         await fetch(URL_SCRIPT, {
+             method: 'POST',
+             mode: 'no-cors', // Mantenemos modo opaco para evitar bloqueos del navegador
+             headers: {
+                 'Content-Type': 'text/plain'
+             }, // 1. CAMBIO: Cabecera compatible
+             body: JSON.stringify(datos)
+         });
+
+         alert("¡Resultado enviado!");
+
+         setTimeout(() => {
+             location.reload();
+         }, 1000);
+
+     } catch (err) {
+         console.error(err); // 4. CAMBIO: Log de error para depurar
+         alert("Error de conexión");
+         btn.disabled = false;
+         btn.innerText = "Guardar Resultado";
+     }
+
+ };
 
         function validarJugadores() {
             const js = [document.getElementById('j1').value, document.getElementById('j2').value, document.getElementById('j3').value, document.getElementById('j4').value].filter(v => v !== "");
@@ -507,5 +549,6 @@
     </script>
 </body>
 </html>
+
 
 
