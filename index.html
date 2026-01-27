@@ -497,7 +497,7 @@
 
      const parts = document.getElementById('fechaForm').value.split('-');
      const datos = {
-		 pass: pinIngresado,
+		 pass: document.getElementById('pass').value, // Usar el valor del input
 		 action: "CREATE",
          fecha: `${parts[2]}/${parts[1]}/${parts[0]}`,
          temporada: parts[0],
@@ -551,6 +551,7 @@
     </script>
 </body>
 </html>
+
 
 
 
