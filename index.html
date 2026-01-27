@@ -275,7 +275,7 @@
             let stats={}; 
             Object.keys(infoJugadores).forEach(n=> stats[n] = {v:0, d:0, pj:0, sg:0, st:0, jg:0, jt:0, racha:[]});
 
-            partidos.forEach(c => {
+            [...partidos].reverse().forEach(c => {
                 const s = c.map(v => parseInt(v) || 0);
                 const sE1 = (s[8]>s[9]?1:0)+(s[10]>s[11]?1:0)+(s[12]>s[13]?1:0);
                 const sE2 = (s[9]>s[8]?1:0)+(s[11]>s[10]?1:0)+(s[13]>s[12]?1:0);
@@ -551,6 +551,7 @@
     </script>
 </body>
 </html>
+
 
 
 
